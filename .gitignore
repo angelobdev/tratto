@@ -1,0 +1,17 @@
+# Build output
+/build*/
+CMakeUserPresets.json
+CMakeLists.txt.user*
+compile_commands.json
+.cache/
+*.qm
+
+# Local, not shared
+CLAUDE.local.md
+.claude/settings.local.json
+/spikes/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
