@@ -48,14 +48,14 @@ tratto/
 ├── CMakeLists.txt
 ├── src/
 │   ├── core/       # tratto_core: data model, stroke geometry, commands, undo/redo. QtCore only.
-│   ├── render/     # (from M1) tratto_render: QPainter rendering of pages and objects (tiles, thumbnails, export)
+│   ├── render/     # tratto_render: QPainter rendering of pages and objects (tiles, thumbnails, export)
 │   ├── storage/    # (from M2) tratto_storage: note bundles, SQLite index, autosave, migrations
 │   ├── pdf/        # (from M4) tratto_pdf: PDF import, rasterization, annotated export (worker thread)
 │   └── app/        # executable: QML UI, canvas item, input handling, controllers exposed to QML
 │       └── qml/
 ├── tests/          # one Qt Test executable per library
 ├── i18n/           # tratto_it.ts (+ tratto_en.ts for English plural forms)
-├── data/           # icons, .desktop file, metainfo
+├── data/           # .desktop file, metainfo, app icon
 ├── docs/
 └── scripts/
 ```
@@ -90,7 +90,7 @@ struct PaperStyle {
     PageFormat format;
     Orientation orientation;             // ignored for Continuous
 };
-// Background: Blank | Ruled{spacingMm} | Grid{spacingMm} | Dots{spacingMm}   (std::variant)
+struct Background { PatternKind kind; float spacingMm; };  // Blank | Ruled | Grid | Dots
 enum class PageFormat { A4, Letter, Continuous }; // Continuous: A4 width, height grows with content
 
 struct Page {
@@ -130,6 +130,7 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
   - It receives `QTabletEvent` (position, pressure, tilt, pointer type) before Qt Quick synthesizes mouse events.
   - Events outside the canvas are passed through.
   - The **eraser tip** (`PointerType::Eraser`) activates the eraser while it is in use.
+  - Many 2-in-1 pens have no eraser tip, only a barrel button: **holding the barrel button erases** (default; configurable in settings).
 - **Mouse:** constant pressure 0.5. Mouse events synthesized from touch are ignored.
 - **Fingers:**
   - With **"Stylus only"** on (the default in tablet mode), a finger never draws.
@@ -253,6 +254,10 @@ notes/<note-id>/
 - **Tablet mode:**
   - an editor state that changes density and layout;
   - tools move from a horizontal row of 44 px buttons to a floating vertical bar of 56 px buttons, with larger popovers.
+- **Bundled assets:**
+  - UI font: Inter (SIL OFL 1.1), in `src/app/fonts/`, set as the application font at startup;
+  - icons: Lucide path data (ISC) in `qml/components/Icons.qml`, drawn by `Icon.qml` with Qt Quick Shapes, so they recolor with the theme and stay crisp at any scale.
+- **Development options:** `--color-scheme light|dark`, `--language <code>` and `--screenshot <file>` (saves the window and quits) for visual checks without a display.
 - **Strings:**
   - every user-visible string goes through `qsTr()` / `tr()`, in `app` only;
   - `core` returns error codes, never text.

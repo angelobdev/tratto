@@ -49,6 +49,9 @@ public:
     QColor accentInk() const;
     QList<QColor> accentPresets() const;
 
+    // Moves `color` towards white by `amount` (0..1), e.g. for group tints.
+    Q_INVOKABLE QColor mixWithWhite(const QColor &color, qreal amount) const;
+
 signals:
     void modeChanged();
     void darkChanged();

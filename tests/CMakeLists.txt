@@ -10,3 +10,5 @@ function(tratto_add_test name)
 endfunction()
 
 tratto_add_test(tst_color SOURCES core/tst_color.cpp LIBS tratto_core)
+tratto_add_test(tst_paper SOURCES core/tst_paper.cpp LIBS tratto_core)
+tratto_add_test(tst_paper_painter SOURCES render/tst_paper_painter.cpp LIBS tratto_render)

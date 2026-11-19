@@ -112,3 +112,8 @@ QList<QColor> Appearance::accentPresets() const
         presets.append(toQColor(preset));
     return presets;
 }
+
+QColor Appearance::mixWithWhite(const QColor &color, qreal amount) const
+{
+    return toQColor(tratto::core::mixWithWhite(toRgba(color), amount));
+}

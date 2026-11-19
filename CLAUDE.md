@@ -24,6 +24,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ./build/src/app/tratto
 cmake --build build --target format    # clang-format
+./build/src/app/tratto --screenshot shot.png [--color-scheme dark] [--language it]   # visual check, no display needed (QT_QPA_PLATFORM=offscreen)
 ```
 
 System dependencies (Qt ≥ 6.8, CMake ≥ 3.21, a C++23 compiler):
@@ -66,6 +67,6 @@ System dependencies (Qt ≥ 6.8, CMake ≥ 3.21, a C++23 compiler):
 
 - Proceed by milestone and, within a milestone, in small steps that compile.
 - At the end of each step: build, tests and clang-format all clean, with no compiler warnings.
-- When touching input, rendering or gestures, ask for a test on a real 2-in-1 and say exactly what to try: pressure, the stylus eraser tip, a resting palm, pinch.
+- When touching input, rendering or gestures, ask for a test on a real 2-in-1 and say exactly what to try: pressure, the eraser (tip or barrel button), a resting palm, pinch.
 - Stroke performance matters more than anything else. If a choice makes latency worse, flag it.
 - For visuals, follow the approved screen designs and `docs/DESIGN.md`. Don't invent new screens without asking.

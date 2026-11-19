@@ -92,4 +92,4 @@ Every text/background pair has a contrast ratio of at least 4.5:1. Keep it that 
 ## Icons
 
 - **Style:** outline icons with a 1.8 stroke and rounded corners, 20–22 px on desktop and 24–26 px in tablet mode.
-- **Source:** [Lucide](https://lucide.dev) SVGs (ISC license), bundled in `data/icons/`, recolored at runtime to the theme's icon color.
+- **Source:** [Lucide](https://lucide.dev) (ISC license). Their path data lives in `src/app/qml/components/Icons.qml` and is recolored at runtime to the theme's icon color.

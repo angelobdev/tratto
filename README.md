@@ -52,3 +52,7 @@ cmake --build build --target update_translations
 ## License
 
 [GPL-3.0-or-later](LICENSE).
+
+Bundled third-party assets:
+- [Inter](https://rsms.me/inter/) font, SIL Open Font License 1.1 ([`src/app/fonts/OFL.txt`](src/app/fonts/OFL.txt)).
+- [Lucide](https://lucide.dev) icons, ISC License ([`src/app/qml/components/LUCIDE-LICENSE`](src/app/qml/components/LUCIDE-LICENSE)).

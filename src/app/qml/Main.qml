@@ -13,7 +13,6 @@ ApplicationWindow {
     title: "Tratto"
     color: Theme.background
 
-    font.family: Theme.fontFamily
     font.pixelSize: Theme.fontBody
 
     // The Basic style draws its controls from this palette, so they follow the theme.

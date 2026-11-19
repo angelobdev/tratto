@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 qt_add_executable(tratto main.cpp)
 
-set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(
+    qml/Theme.qml
+    qml/Format.qml
+    qml/components/Icons.qml
+    qml/library/FakeLibrary.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(tratto
     URI Tratto
@@ -9,12 +14,35 @@ qt_add_qml_module(tratto
     QML_FILES
         qml/Main.qml
         qml/Theme.qml
-        qml/LibraryPage.qml
+        qml/Format.qml
         qml/EditorPage.qml
+        qml/components/AppButton.qml
+        qml/components/FocusRing.qml
+        qml/components/Icon.qml
+        qml/components/IconButton.qml
+        qml/components/Icons.qml
+        qml/components/NavItem.qml
+        qml/components/ResponsiveGrid.qml
+        qml/components/SearchInput.qml
+        qml/library/AppearancePopup.qml
+        qml/library/FakeLibrary.qml
+        qml/library/GroupCard.qml
+        qml/library/LibraryPage.qml
+        qml/library/LibrarySidebar.qml
+        qml/library/NoteCard.qml
+        qml/library/SortButton.qml
+        qml/library/ViewToggle.qml
     SOURCES
         appearance.h appearance.cpp
         localization.h localization.cpp
+        paperthumbnail.h paperthumbnail.cpp
 )
+
+# Inter (SIL Open Font License, see fonts/OFL.txt), loaded at startup.
+qt_add_resources(tratto "fonts"
+    PREFIX /fonts
+    BASE fonts
+    FILES fonts/InterVariable.ttf)
 
 target_compile_definitions(tratto PRIVATE
     TRATTO_VERSION="${PROJECT_VERSION}"
@@ -22,6 +50,7 @@ target_compile_definitions(tratto PRIVATE
 
 target_link_libraries(tratto PRIVATE
     tratto_core
+    tratto_render
     Qt6::Gui
     Qt6::Quick
     Qt6::QuickControls2)
@@ -32,7 +61,8 @@ tratto_set_warnings(tratto)
 qt_add_translations(tratto
     TS_FILE_BASE tratto
     TS_FILE_DIR ${PROJECT_SOURCE_DIR}/i18n
-    RESOURCE_PREFIX /i18n)
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete)
 
 set_target_properties(tratto PROPERTIES
     WIN32_EXECUTABLE TRUE

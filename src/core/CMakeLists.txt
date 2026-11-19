@@ -3,6 +3,8 @@
 add_library(tratto_core STATIC
     include/tratto/core/color.h
     color.cpp
+    include/tratto/core/paper.h
+    paper.cpp
 )
 target_include_directories(tratto_core PUBLIC include)
 target_link_libraries(tratto_core PUBLIC Qt6::Core)
