@@ -46,6 +46,12 @@ QtObject {
         }
     }
 
+    // A new, empty note: standalone, white ruled paper.
+    function newNote() {
+        return note(qsTr("Untitled note"), "", 0, new Date().getHours(), new Date().getMinutes(),
+                    PaperThumbnail.Ruled, 6, "#FFFFFF")
+    }
+
     function group(id) {
         return groups.find(g => g.id === id) ?? null
     }

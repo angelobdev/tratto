@@ -7,7 +7,7 @@ import QtQuick.Layouts
 Page {
     id: page
 
-    signal openNote(string title)
+    signal openNote(var note)
     signal openSettings()
 
     background: Rectangle { color: Theme.background }
@@ -132,7 +132,7 @@ Page {
                             primary: true
                             text: qsTr("New note")
                             iconName: "plus"
-                            onClicked: page.openNote(qsTr("Untitled note"))
+                            onClicked: page.openNote(FakeLibrary.newNote())
                         }
                     }
                 }
@@ -216,7 +216,7 @@ Page {
 
                                 width: parent.cellWidth
                                 note: modelData
-                                onClicked: page.openNote(modelData.title)
+                                onClicked: page.openNote(modelData)
                             }
                         }
                     }

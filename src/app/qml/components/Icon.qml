@@ -10,6 +10,7 @@ Item {
     property color color: Theme.textSecondary
     property real size: 18
     property real strokeWidth: 1.8 // in the 24 x 24 icon grid, like the SVG
+    property bool filled: false     // fill instead of stroke (e.g. "ellipsis" dots)
 
     implicitWidth: size
     implicitHeight: size
@@ -22,9 +23,9 @@ Item {
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
-            strokeColor: root.color
+            strokeColor: root.filled ? "transparent" : root.color
             strokeWidth: root.strokeWidth
-            fillColor: "transparent"
+            fillColor: root.filled ? root.color : "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
 

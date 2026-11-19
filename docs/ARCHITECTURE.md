@@ -254,6 +254,11 @@ notes/<note-id>/
   - light / dark / system follows `QStyleHints::colorScheme`;
   - the accent color is a property of `Theme`, so changing it updates the UI live;
   - in dark mode, accent text and icons use the lightened accent (see `DESIGN.md`).
+- **Editor:**
+  - top bar (back, title and group, save status, undo/redo, tablet mode, pages panel, export, more) and a centered tool row with the options of the current tool, as in the design;
+  - tool state lives in the C++ `EditorTools` object (current tool, colors, widths, eraser and selection modes, text style); the toolbar edits it from QML and the canvas reads it from C++. Presets (widths in pt, ink and highlighter colors, text sizes) are in `core/tools.h`;
+  - 100% zoom shows an A4 page 680 px wide, as in the design; zoom levels are quantized (§6);
+  - tool shortcuts: P, H, E, T, S, I; zoom with Ctrl +/−.
 - **Tablet mode:**
   - an editor state that changes density and layout;
   - tools move from a horizontal row of 44 px buttons to a floating vertical bar of 56 px buttons, with larger popovers.

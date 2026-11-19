@@ -10,8 +10,13 @@ AbstractButton {
     property real iconSize: 16
     property real size: 28
     property int radius: 6
-    property color iconColor: Theme.textSecondary
+    property real iconStrokeWidth: 2
+    property bool iconFilled: false
+    property color iconColor: active ? Theme.accentInk : Theme.textSecondary
+    // Selected state (current tool, open panel): accent-tinted background.
+    property bool active: false
 
+    opacity: enabled ? 1 : 0.4
     implicitWidth: size
     implicitHeight: size
     hoverEnabled: true
@@ -27,14 +32,17 @@ AbstractButton {
             anchors.centerIn: parent
             name: control.iconName
             size: control.iconSize
-            strokeWidth: 2
+            strokeWidth: control.iconStrokeWidth
+            filled: control.iconFilled
             color: control.iconColor
         }
     }
 
     background: Rectangle {
         radius: control.radius
-        color: control.down ? Theme.pressed : control.hovered ? Theme.hover : "transparent"
+        color: control.active ? Theme.accentSoft
+             : control.down ? Theme.pressed
+             : control.hovered ? Theme.hover : "transparent"
 
         FocusRing { visible: control.visualFocus }
     }

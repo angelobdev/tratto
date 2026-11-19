@@ -179,16 +179,51 @@
     </message>
 </context>
 <context>
-    <name>EditorPage</name>
+    <name>EditorTopBar</name>
     <message>
-        <location filename="../src/app/qml/EditorPage.qml" line="34"/>
-        <source>Back</source>
-        <translation>Indietro</translation>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="35"/>
+        <source>Library</source>
+        <translation>Libreria</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/EditorPage.qml" line="60"/>
-        <source>The canvas arrives in the next milestone.</source>
-        <translation>Il canvas arriva nella prossima milestone.</translation>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="36"/>
+        <source>Back to the library</source>
+        <translation>Torna alla libreria</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="103"/>
+        <source>Saved automatically</source>
+        <translation>Salvato automaticamente</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="117"/>
+        <source>Undo (Ctrl+Z)</source>
+        <translation>Annulla (Ctrl+Z)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="127"/>
+        <source>Redo (Ctrl+Shift+Z)</source>
+        <translation>Ripeti (Ctrl+Maiusc+Z)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="139"/>
+        <source>Tablet mode</source>
+        <translation>Modalità tablet</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="149"/>
+        <source>Pages</source>
+        <translation>Pagine</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="161"/>
+        <source>Export</source>
+        <translation>Esporta</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="173"/>
+        <source>More options</source>
+        <translation>Altre opzioni</translation>
     </message>
 </context>
 <context>
@@ -247,6 +282,11 @@
         <location filename="../src/app/qml/library/FakeLibrary.qml" line="35"/>
         <source>Kitchen floor plan.jpg</source>
         <translation>Planimetria cucina.jpg</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/FakeLibrary.qml" line="51"/>
+        <source>Untitled note</source>
+        <translation>Nota senza titolo</translation>
     </message>
 </context>
 <context>
@@ -383,11 +423,6 @@
         <source>New note</source>
         <translation>Nuova nota</translation>
     </message>
-    <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="135"/>
-        <source>Untitled note</source>
-        <translation>Nota senza titolo</translation>
-    </message>
 </context>
 <context>
     <name>LibrarySidebar</name>
@@ -428,19 +463,29 @@
     </message>
 </context>
 <context>
-    <name>Main</name>
-    <message>
-        <location filename="../src/app/qml/Main.qml" line="54"/>
-        <source>Untitled note</source>
-        <translation>Nota senza titolo</translation>
-    </message>
-</context>
-<context>
     <name>NoteCard</name>
     <message>
         <location filename="../src/app/qml/library/NoteCard.qml" line="96"/>
         <source>Standalone note</source>
         <translation>Nota libera</translation>
+    </message>
+</context>
+<context>
+    <name>PagesPanel</name>
+    <message>
+        <location filename="../src/app/qml/editor/PagesPanel.qml" line="43"/>
+        <source>Pages</source>
+        <translation>Pagine</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/PagesPanel.qml" line="68"/>
+        <source>Page %1</source>
+        <translation>Pagina %1</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/PagesPanel.qml" line="122"/>
+        <source>Add page</source>
+        <translation>Aggiungi pagina</translation>
     </message>
 </context>
 <context>
@@ -517,6 +562,216 @@
     </message>
 </context>
 <context>
+    <name>ToolRow</name>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="125"/>
+        <source>Black</source>
+        <translation>Nero</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="125"/>
+        <source>Blue</source>
+        <translation>Blu</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="125"/>
+        <source>Red</source>
+        <translation>Rosso</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="125"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="128"/>
+        <source>Green</source>
+        <translation>Verde</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="125"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="128"/>
+        <source>Orange</source>
+        <translation>Arancione</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="125"/>
+        <source>Violet</source>
+        <translation>Viola</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="128"/>
+        <source>Yellow</source>
+        <translation>Giallo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="128"/>
+        <source>Pink</source>
+        <translation>Rosa</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="128"/>
+        <source>Sky</source>
+        <translation>Azzurro</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="153"/>
+        <source>Pen (P)</source>
+        <translation>Penna (P)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="159"/>
+        <source>Highlighter (H)</source>
+        <translation>Evidenziatore (H)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="162"/>
+        <source>Eraser (E)</source>
+        <translation>Gomma (E)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="163"/>
+        <source>Text (T)</source>
+        <translation>Testo (T)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="164"/>
+        <source>Selection (S)</source>
+        <translation>Selezione (S)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="165"/>
+        <source>Insert image (I)</source>
+        <translation>Inserisci immagine (I)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="194"/>
+        <source>More colors</source>
+        <translation>Altri colori</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="221"/>
+        <source>Fine stroke</source>
+        <translation>Tratto sottile</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="222"/>
+        <source>Medium stroke</source>
+        <translation>Tratto medio</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="223"/>
+        <source>Thick stroke</source>
+        <translation>Tratto spesso</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="269"/>
+        <source>Fine highlighter</source>
+        <translation>Evidenziatore sottile</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="270"/>
+        <source>Medium highlighter</source>
+        <translation>Evidenziatore medio</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="271"/>
+        <source>Thick highlighter</source>
+        <translation>Evidenziatore spesso</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="295"/>
+        <source>Straight line</source>
+        <translation>Linea dritta</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="309"/>
+        <source>Whole stroke</source>
+        <translation>Tratto intero</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="310"/>
+        <source>Partial</source>
+        <translation>Porzione</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="319"/>
+        <source>Small eraser</source>
+        <translation>Gomma piccola</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="320"/>
+        <source>Medium eraser</source>
+        <translation>Gomma media</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="321"/>
+        <source>Large eraser</source>
+        <translation>Gomma grande</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="347"/>
+        <source>Highlighter only</source>
+        <translation>Solo evidenziatore</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="359"/>
+        <source>Font</source>
+        <translation>Carattere</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="362"/>
+        <source>Serif</source>
+        <translation>Serif</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="363"/>
+        <source>Monospace</source>
+        <translation>Monospace</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="370"/>
+        <source>Size</source>
+        <translation>Dimensione</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="377"/>
+        <source>Bold</source>
+        <translation>Grassetto</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="391"/>
+        <source>Italic</source>
+        <translation>Corsivo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="433"/>
+        <source>Freeform</source>
+        <translation>Libera</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="434"/>
+        <source>Rectangle</source>
+        <translation>Rettangolo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="442"/>
+        <source>Drag around strokes, text or images</source>
+        <translation>Trascina attorno a tratti, testo o immagini</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="458"/>
+        <source>From file…</source>
+        <translation>Da file…</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="468"/>
+        <source>From clipboard</source>
+        <translation>Dagli appunti</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="476"/>
+        <source>Or drag an image onto the page</source>
+        <translation>Oppure trascina un'immagine sulla pagina</translation>
+    </message>
+</context>
+<context>
     <name>ViewToggle</name>
     <message>
         <location filename="../src/app/qml/library/ViewToggle.qml" line="23"/>
@@ -527,6 +782,24 @@
         <location filename="../src/app/qml/library/ViewToggle.qml" line="24"/>
         <source>List view</source>
         <translation>Vista a elenco</translation>
+    </message>
+</context>
+<context>
+    <name>ZoomControl</name>
+    <message>
+        <location filename="../src/app/qml/editor/ZoomControl.qml" line="35"/>
+        <source>Zoom out</source>
+        <translation>Riduci zoom</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ZoomControl.qml" line="53"/>
+        <source>Zoom in</source>
+        <translation>Aumenta zoom</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/ZoomControl.qml" line="62"/>
+        <source>Page %1 of %2</source>
+        <translation>Pagina %1 di %2</translation>
     </message>
 </context>
 </TS>

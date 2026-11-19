@@ -14,7 +14,7 @@ If a decision changes, update `docs/ARCHITECTURE.md` in the same commit.
 
 ## Status
 
-Current milestone: **M0** (CMake project, window, Library ↔ Editor navigation, theme + accent color, i18n wiring). Update this line whenever a milestone is completed.
+Current milestone: **M1** (canvas item: one page with paper, pressure pen with stylus and mouse, zoom/pan, undo/redo). M0 is done. Update this line whenever a milestone is completed.
 
 ## Commands
 

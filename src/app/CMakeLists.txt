@@ -15,9 +15,12 @@ qt_add_qml_module(tratto
         qml/Main.qml
         qml/Theme.qml
         qml/Format.qml
-        qml/EditorPage.qml
         qml/components/AppButton.qml
         qml/components/AppSwitch.qml
+        qml/components/BackButton.qml
+        qml/components/CheckOption.qml
+        qml/components/CompactComboBox.qml
+        qml/components/Divider.qml
         qml/components/FocusRing.qml
         qml/components/Icon.qml
         qml/components/IconButton.qml
@@ -25,6 +28,12 @@ qt_add_qml_module(tratto
         qml/components/NavItem.qml
         qml/components/ResponsiveGrid.qml
         qml/components/SearchInput.qml
+        qml/components/SegmentedChoice.qml
+        qml/editor/EditorPage.qml
+        qml/editor/EditorTopBar.qml
+        qml/editor/PagesPanel.qml
+        qml/editor/ToolRow.qml
+        qml/editor/ZoomControl.qml
         qml/library/FakeLibrary.qml
         qml/library/GroupCard.qml
         qml/library/LibraryPage.qml
@@ -46,6 +55,7 @@ qt_add_qml_module(tratto
         preferences.h preferences.cpp
         appsettings.h
         paperthumbnail.h paperthumbnail.cpp
+        editortools.h editortools.cpp
 )
 
 # Inter (SIL Open Font License, see fonts/OFL.txt), loaded at startup.

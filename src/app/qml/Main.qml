@@ -51,7 +51,7 @@ ApplicationWindow {
             if (window.startPage === "settings")
                 stack.push(settingsPage, {}, StackView.Immediate)
             else if (window.startPage === "editor")
-                stack.push(editorPage, { noteTitle: qsTr("Untitled note") }, StackView.Immediate)
+                stack.push(editorPage, { note: FakeLibrary.notes[0] }, StackView.Immediate)
         }
     }
 
@@ -59,7 +59,7 @@ ApplicationWindow {
         id: libraryPage
 
         LibraryPage {
-            onOpenNote: title => stack.push(editorPage, { noteTitle: title })
+            onOpenNote: note => stack.push(editorPage, { note: note })
             onOpenSettings: stack.push(settingsPage)
         }
     }
