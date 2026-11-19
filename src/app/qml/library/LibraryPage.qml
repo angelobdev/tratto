@@ -8,6 +8,7 @@ Page {
     id: page
 
     signal openNote(string title)
+    signal openSettings()
 
     background: Rectangle { color: Theme.background }
 
@@ -58,7 +59,7 @@ Page {
             id: sidebar
 
             Layout.fillHeight: true
-            onSettingsRequested: appearancePopup.open()
+            onSettingsRequested: page.openSettings()
         }
 
         ScrollView {
@@ -232,11 +233,5 @@ Page {
                 }
             }
         }
-    }
-
-    AppearancePopup {
-        id: appearancePopup
-
-        anchors.centerIn: parent
     }
 }

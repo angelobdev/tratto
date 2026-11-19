@@ -24,9 +24,9 @@ ApplicationWindow {
         text: Theme.text
         button: Theme.surfaceAlt
         buttonText: Theme.text
-        brightText: Theme.onAccent
+        brightText: Theme.accentForeground
         highlight: Theme.accent
-        highlightedText: Theme.onAccent
+        highlightedText: Theme.accentForeground
         placeholderText: Theme.textMuted
         light: Theme.surface
         midlight: Theme.surfaceAlt
@@ -37,11 +37,22 @@ ApplicationWindow {
         toolTipText: Theme.text
     }
 
+    // Page to show at startup: "library", "settings" or "editor" (--page, for development).
+    property string startPage: "library"
+
     StackView {
         id: stack
 
         anchors.fill: parent
         initialItem: libraryPage
+        focus: true
+
+        Component.onCompleted: {
+            if (window.startPage === "settings")
+                stack.push(settingsPage, {}, StackView.Immediate)
+            else if (window.startPage === "editor")
+                stack.push(editorPage, { noteTitle: qsTr("Untitled note") }, StackView.Immediate)
+        }
     }
 
     Component {
@@ -49,6 +60,16 @@ ApplicationWindow {
 
         LibraryPage {
             onOpenNote: title => stack.push(editorPage, { noteTitle: title })
+            onOpenSettings: stack.push(settingsPage)
+        }
+    }
+
+    Component {
+        id: settingsPage
+
+        SettingsPage {
+            focus: true
+            onBack: stack.pop()
         }
     }
 

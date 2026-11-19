@@ -245,7 +245,10 @@ notes/<note-id>/
   - content: a `GridView` of thumbnails (or a list);
   - search queries SQLite.
 - **New note:** a dialog with a live preview of the paper.
-- **Settings:** a dialog with sections.
+- **Settings:**
+  - a page in the `StackView` (not a dialog): a section list on the left (General, Appearance, Pen and input, New notes, Export, Storage and backup, About) and the selected section on the right;
+  - preferences are saved with `QSettings` to `settings.ini` in the per-user config folder (`~/.config/tratto/` on Linux): theme, accent color, language, tablet mode, input options;
+  - command-line overrides (`--color-scheme`, `--language`) apply to that session only and are not saved.
 - **Theme:**
   - a QML singleton `Theme` holds the `DESIGN.md` tokens for light and dark;
   - light / dark / system follows `QStyleHints::colorScheme`;
@@ -257,7 +260,7 @@ notes/<note-id>/
 - **Bundled assets:**
   - UI font: Inter (SIL OFL 1.1), in `src/app/fonts/`, set as the application font at startup;
   - icons: Lucide path data (ISC) in `qml/components/Icons.qml`, drawn by `Icon.qml` with Qt Quick Shapes, so they recolor with the theme and stay crisp at any scale.
-- **Development options:** `--color-scheme light|dark`, `--language <code>` and `--screenshot <file>` (saves the window and quits) for visual checks without a display.
+- **Development options:** `--color-scheme light|dark`, `--language <code>`, `--page library|settings|editor` and `--screenshot <file>` (saves the window and quits) for visual checks without a display.
 - **Strings:**
   - every user-visible string goes through `qsTr()` / `tr()`, in `app` only;
   - `core` returns error codes, never text.

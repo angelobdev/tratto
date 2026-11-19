@@ -17,6 +17,7 @@ qt_add_qml_module(tratto
         qml/Format.qml
         qml/EditorPage.qml
         qml/components/AppButton.qml
+        qml/components/AppSwitch.qml
         qml/components/FocusRing.qml
         qml/components/Icon.qml
         qml/components/IconButton.qml
@@ -24,7 +25,6 @@ qt_add_qml_module(tratto
         qml/components/NavItem.qml
         qml/components/ResponsiveGrid.qml
         qml/components/SearchInput.qml
-        qml/library/AppearancePopup.qml
         qml/library/FakeLibrary.qml
         qml/library/GroupCard.qml
         qml/library/LibraryPage.qml
@@ -32,9 +32,19 @@ qt_add_qml_module(tratto
         qml/library/NoteCard.qml
         qml/library/SortButton.qml
         qml/library/ViewToggle.qml
+        qml/settings/AccentPreview.qml
+        qml/settings/AccentSwatch.qml
+        qml/settings/AppearanceSection.qml
+        qml/settings/GeneralSection.qml
+        qml/settings/OptionGroup.qml
+        qml/settings/OptionRow.qml
+        qml/settings/SettingsPage.qml
+        qml/settings/ThemeCard.qml
     SOURCES
         appearance.h appearance.cpp
         localization.h localization.cpp
+        preferences.h preferences.cpp
+        appsettings.h
         paperthumbnail.h paperthumbnail.cpp
 )
 

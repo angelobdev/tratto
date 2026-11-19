@@ -46,7 +46,7 @@ Rectangle {
                 Icon {
                     anchors.centerIn: parent
                     name: "pen-line"
-                    color: Theme.onAccent
+                    color: Theme.accentForeground
                     strokeWidth: 2
                 }
             }

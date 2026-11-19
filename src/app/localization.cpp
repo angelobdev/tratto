@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "localization.h"
 
+#include "appsettings.h"
+
 #include <QCoreApplication>
 #include <QJSEngine>
 #include <QLocale>
@@ -14,11 +16,13 @@ namespace {
 Localization *s_instance = nullptr;
 
 constexpr auto kSourceLanguage = "en";
+const QString kLanguageKey = QStringLiteral("general/language");
 
 } // namespace
 
 Localization::Localization(QObject *parent)
     : QObject(parent)
+    , m_language(appSettings().value(kLanguageKey).toString())
 {
     apply();
 }
@@ -41,6 +45,15 @@ void Localization::setEngine(QQmlEngine *engine)
 }
 
 void Localization::setLanguage(const QString &language)
+{
+    if (language == m_language)
+        return;
+    m_language = language;
+    appSettings().setValue(kLanguageKey, language);
+    apply();
+}
+
+void Localization::overrideLanguage(const QString &language)
 {
     if (language == m_language)
         return;

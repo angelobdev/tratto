@@ -21,7 +21,7 @@ class Appearance : public QObject
     Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged FINAL)
     Q_PROPERTY(bool dark READ dark NOTIFY darkChanged FINAL)
     Q_PROPERTY(QColor accent READ accent WRITE setAccent NOTIFY paletteChanged FINAL)
-    Q_PROPERTY(QColor onAccent READ onAccent NOTIFY paletteChanged FINAL)
+    Q_PROPERTY(QColor accentForeground READ accentForeground NOTIFY paletteChanged FINAL)
     Q_PROPERTY(QColor accentSoft READ accentSoft NOTIFY paletteChanged FINAL)
     Q_PROPERTY(QColor accentInk READ accentInk NOTIFY paletteChanged FINAL)
     Q_PROPERTY(QList<QColor> accentPresets READ accentPresets CONSTANT FINAL)
@@ -39,12 +39,13 @@ public:
     static void setInstance(Appearance *instance);
 
     Mode mode() const { return m_mode; }
-    void setMode(Mode mode);
+    void setMode(Mode mode); // saved to the settings
+    void overrideMode(Mode mode); // this session only (command line)
     bool dark() const { return m_dark; }
 
     QColor accent() const { return m_accent; }
     void setAccent(const QColor &accent);
-    QColor onAccent() const;
+    QColor accentForeground() const;
     QColor accentSoft() const;
     QColor accentInk() const;
     QList<QColor> accentPresets() const;
@@ -58,6 +59,7 @@ signals:
     void paletteChanged();
 
 private:
+    void applyMode(Mode mode);
     void updateDark();
 
     Mode m_mode = Mode::System;

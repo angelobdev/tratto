@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "appearance.h"
 #include "localization.h"
+#include "preferences.h"
 
 #include <QCommandLineParser>
 #include <QFont>
@@ -73,7 +74,11 @@ int main(int argc, char *argv[])
         QStringLiteral("screenshot"),
         QStringLiteral("Save a screenshot of the window to <file> and quit (development)."),
         QStringLiteral("file"));
-    parser.addOptions({ colorSchemeOption, languageOption, screenshotOption });
+    const QCommandLineOption pageOption(
+        QStringLiteral("page"),
+        QStringLiteral("Open <page> at startup: library, settings or editor (development)."),
+        QStringLiteral("page"), QStringLiteral("library"));
+    parser.addOptions({ colorSchemeOption, languageOption, screenshotOption, pageOption });
     parser.process(app);
 
     loadUiFont();
@@ -84,20 +89,24 @@ int main(int argc, char *argv[])
     Appearance::setInstance(&appearance);
     const QString scheme = parser.value(colorSchemeOption);
     if (scheme == QLatin1String("light"))
-        appearance.setMode(Appearance::Mode::Light);
+        appearance.overrideMode(Appearance::Mode::Light);
     else if (scheme == QLatin1String("dark"))
-        appearance.setMode(Appearance::Mode::Dark);
+        appearance.overrideMode(Appearance::Mode::Dark);
 
     Localization localization(nullptr);
     Localization::setInstance(&localization);
     if (parser.isSet(languageOption))
-        localization.setLanguage(parser.value(languageOption));
+        localization.overrideLanguage(parser.value(languageOption));
+
+    Preferences preferences(nullptr);
+    Preferences::setInstance(&preferences);
 
     QQmlApplicationEngine engine;
     localization.setEngine(&engine);
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
+    engine.setInitialProperties({ { QStringLiteral("startPage"), parser.value(pageOption) } });
     engine.loadFromModule("Tratto", "Main");
 
     if (parser.isSet(screenshotOption))

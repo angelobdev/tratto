@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "appearance.h"
 
+#include "appsettings.h"
 #include "tratto/core/color.h"
 
 #include <QGuiApplication>
 #include <QJSEngine>
+#include <QMetaEnum>
 #include <QStyleHints>
 
 using tratto::core::Rgba;
@@ -12,6 +14,9 @@ using tratto::core::Rgba;
 namespace {
 
 Appearance *s_instance = nullptr;
+
+const QString kModeKey = QStringLiteral("appearance/mode");
+const QString kAccentKey = QStringLiteral("appearance/accent");
 
 Rgba toRgba(const QColor &color)
 {
@@ -33,6 +38,16 @@ Appearance::Appearance(QObject *parent)
 {
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this,
             &Appearance::updateDark);
+
+    const QSettings &settings = appSettings();
+    const QColor accent(settings.value(kAccentKey).toString());
+    if (accent.isValid())
+        m_accent = accent;
+    bool ok = false;
+    const int mode = QMetaEnum::fromType<Mode>().keyToValue(
+        settings.value(kModeKey).toString().toLatin1().constData(), &ok);
+    if (ok)
+        applyMode(static_cast<Mode>(mode));
     updateDark();
 }
 
@@ -52,6 +67,18 @@ void Appearance::setMode(Mode mode)
 {
     if (mode == m_mode)
         return;
+    applyMode(mode);
+    appSettings().setValue(kModeKey, QVariant::fromValue(mode).toString());
+}
+
+void Appearance::overrideMode(Mode mode)
+{
+    if (mode != m_mode)
+        applyMode(mode);
+}
+
+void Appearance::applyMode(Mode mode)
+{
     m_mode = mode;
 
     // Telling Qt (instead of only our QML) also makes window decorations and
@@ -86,10 +113,11 @@ void Appearance::setAccent(const QColor &accent)
     if (opaque == m_accent)
         return;
     m_accent = opaque;
+    appSettings().setValue(kAccentKey, opaque.name());
     emit paletteChanged();
 }
 
-QColor Appearance::onAccent() const
+QColor Appearance::accentForeground() const
 {
     return toQColor(tratto::core::accentPalette(toRgba(m_accent), m_dark).onAccent);
 }

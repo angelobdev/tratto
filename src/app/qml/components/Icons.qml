@@ -8,6 +8,7 @@ import QtQml
 
 QtObject {
     readonly property var paths: ({
+        "pen": "M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z",
         "pen-line": "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z",
         "notebook-text": "M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-16a2 2 0 0 1 2 -2Z M8 7h8M8 11h8M8 15h5",
         "clock": "M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0Z M12 7v5l3 2",

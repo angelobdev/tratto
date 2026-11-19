@@ -36,7 +36,7 @@ QtObject {
 
     // Accent (user-chosen)
     readonly property color accent: Appearance.accent
-    readonly property color onAccent: Appearance.onAccent
+    readonly property color accentForeground: Appearance.accentForeground
     readonly property color accentSoft: Appearance.accentSoft
     readonly property color accentInk: Appearance.accentInk
 

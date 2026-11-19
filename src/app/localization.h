@@ -33,7 +33,8 @@ public:
     void setEngine(QQmlEngine *engine);
 
     QString language() const { return m_language; }
-    void setLanguage(const QString &language);
+    void setLanguage(const QString &language); // saved to the settings
+    void overrideLanguage(const QString &language); // this session only (command line)
     QString effectiveLanguage() const { return m_effectiveLanguage; }
 
 signals:

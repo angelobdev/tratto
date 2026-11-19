@@ -16,7 +16,7 @@ Button {
     font.pixelSize: 14
     font.weight: Font.DemiBold
 
-    readonly property color foreground: primary ? Theme.onAccent : Theme.text
+    readonly property color foreground: primary ? Theme.accentForeground : Theme.text
 
     contentItem: RowLayout {
         spacing: Theme.gapS

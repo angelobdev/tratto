@@ -24,7 +24,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ./build/src/app/tratto
 cmake --build build --target format    # clang-format
-./build/src/app/tratto --screenshot shot.png [--color-scheme dark] [--language it]   # visual check, no display needed (QT_QPA_PLATFORM=offscreen)
+./build/src/app/tratto --screenshot shot.png [--page settings] [--color-scheme dark] [--language it]   # visual check, no display needed (QT_QPA_PLATFORM=offscreen)
 ```
 
 System dependencies (Qt ≥ 6.8, CMake ≥ 3.21, a C++23 compiler):
@@ -55,6 +55,7 @@ System dependencies (Qt ≥ 6.8, CMake ≥ 3.21, a C++23 compiler):
 - **Dependencies and licenses:**
   - the app is GPL-3.0-or-later: every dependency must be GPL-3.0-compatible, preferably permissive or LGPL (see ARCHITECTURE §2);
   - ask before adding any new dependency.
+- **QML naming:** never name a property `on<Something>`: QML reads it as a signal handler.
 - **Strings:**
   - every user-visible string goes through `qsTr()` / `tr()` and lives in `app`;
   - `core` returns error codes, never text;
