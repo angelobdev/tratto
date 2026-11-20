@@ -226,7 +226,13 @@ Page {
 
                                 width: parent.cellWidth
                                 note: modelData
-                                onClicked: page.openNote(modelData)
+                                onClicked: {
+                                    if (modelData.inTrash)
+                                        page.showNoteMenu(modelData)
+                                    else
+                                        page.openNote(modelData.id)
+                                }
+                                onContextMenuRequested: page.showNoteMenu(modelData)
                             }
                         }
                     }

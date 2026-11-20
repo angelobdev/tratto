@@ -58,6 +58,11 @@ Appearance *Appearance::create(QQmlEngine *, QJSEngine *)
     return s_instance;
 }
 
+Appearance *Appearance::instance()
+{
+    return s_instance;
+}
+
 void Appearance::setInstance(Appearance *instance)
 {
     s_instance = instance;

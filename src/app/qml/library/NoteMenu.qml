@@ -20,6 +20,7 @@ Item {
     Menu {
         id: menu
 
+        objectName: "noteMenu"
         MenuItem { text: qsTr("Open"); onTriggered: root.openRequested() }
         MenuItem { text: qsTr("Rename…"); onTriggered: root.renameRequested() }
 
@@ -62,6 +63,7 @@ Item {
     Menu {
         id: trashMenu
 
+        objectName: "trashMenu"
         MenuItem { text: qsTr("Restore"); onTriggered: Library.restoreNote(root.note.id) }
         MenuItem { text: qsTr("Delete forever…"); onTriggered: root.deleteForeverRequested() }
     }

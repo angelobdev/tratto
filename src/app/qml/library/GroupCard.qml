@@ -7,6 +7,7 @@ import QtQuick.Layouts
 AbstractButton {
     id: control
 
+    objectName: "groupCard"
     required property var group      // an entry of Library.groups
     required property int noteCount
     required property var lastModified

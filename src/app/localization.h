@@ -28,6 +28,7 @@ public:
 
     static Localization *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
     static void setInstance(Localization *instance);
+    static Localization *instance();
 
     // Must be called once the QML engine exists, so language changes can retranslate it.
     void setEngine(QQmlEngine *engine);

@@ -43,6 +43,7 @@ ApplicationWindow {
     StackView {
         id: stack
 
+        objectName: "stack"
         anchors.fill: parent
         initialItem: libraryPage
         focus: true

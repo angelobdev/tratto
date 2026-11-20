@@ -37,6 +37,7 @@ public:
     // QML singleton factory: hands QML the instance owned by main().
     static Appearance *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
     static void setInstance(Appearance *instance);
+    static Appearance *instance();
 
     Mode mode() const { return m_mode; }
     void setMode(Mode mode); // saved to the settings

@@ -17,23 +17,10 @@ tratto_add_test(tst_paper_painter SOURCES render/tst_paper_painter.cpp LIBS trat
 tratto_add_test(tst_page_painter SOURCES render/tst_page_painter.cpp LIBS tratto_render)
 tratto_add_test(tst_storage SOURCES storage/tst_storage.cpp LIBS tratto_storage)
 
-# The canvas and its collaborators, compiled straight into the test.
-set(TRATTO_APP_DIR ${PROJECT_SOURCE_DIR}/src/app)
-tratto_add_test(tst_canvas
-    SOURCES app/tst_canvas.cpp
-        ${TRATTO_APP_DIR}/canvasitem.h ${TRATTO_APP_DIR}/canvasitem.cpp
-        ${TRATTO_APP_DIR}/editortools.h ${TRATTO_APP_DIR}/editortools.cpp
-        ${TRATTO_APP_DIR}/notesession.h ${TRATTO_APP_DIR}/notesession.cpp
-        ${TRATTO_APP_DIR}/preferences.h ${TRATTO_APP_DIR}/preferences.cpp
-        ${TRATTO_APP_DIR}/library.h ${TRATTO_APP_DIR}/library.cpp
-    LIBS tratto_render tratto_storage Qt6::Quick)
-target_include_directories(tst_canvas PRIVATE ${TRATTO_APP_DIR})
+# App-level tests link the app library; tst_ui also loads its QML module.
+tratto_add_test(tst_canvas SOURCES app/tst_canvas.cpp LIBS tratto_ui)
 # Keep the test from touching the user's settings.
 set_property(TEST tst_canvas APPEND PROPERTY ENVIRONMENT "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/test-config")
-
-tratto_add_test(tst_library
-    SOURCES app/tst_library.cpp
-        ${TRATTO_APP_DIR}/library.h ${TRATTO_APP_DIR}/library.cpp
-        ${TRATTO_APP_DIR}/notesession.h ${TRATTO_APP_DIR}/notesession.cpp
-    LIBS tratto_render tratto_storage Qt6::Qml)
-target_include_directories(tst_library PRIVATE ${TRATTO_APP_DIR})
+tratto_add_test(tst_library SOURCES app/tst_library.cpp LIBS tratto_ui)
+tratto_add_test(tst_ui SOURCES app/tst_ui.cpp LIBS tratto_ui tratto_uiplugin)
+set_property(TEST tst_ui APPEND PROPERTY ENVIRONMENT "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/test-config")

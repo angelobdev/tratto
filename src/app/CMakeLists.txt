@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-qt_add_executable(tratto main.cpp)
+# The app is a static library (C++ types + the QML module) and a small executable,
+# so UI tests can load the same QML module (tests/app/tst_ui.cpp).
+qt_add_library(tratto_ui STATIC)
 
 set_source_files_properties(
     qml/Theme.qml
@@ -7,7 +9,7 @@ set_source_files_properties(
     qml/components/Icons.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_qml_module(tratto
+qt_add_qml_module(tratto_ui
     URI Tratto
     VERSION 1.0
     QML_FILES
@@ -36,7 +38,7 @@ qt_add_qml_module(tratto
         qml/editor/PagesPanel.qml
         qml/editor/ToolRow.qml
         qml/editor/ZoomControl.qml
-            qml/library/GroupCard.qml
+        qml/library/GroupCard.qml
         qml/library/GroupDialog.qml
         qml/library/GroupMenu.qml
         qml/library/NewNoteDialog.qml
@@ -64,35 +66,39 @@ qt_add_qml_module(tratto
         notesession.h notesession.cpp
         library.h library.cpp
         canvasitem.h canvasitem.cpp
+        appservices.h appservices.cpp
 )
 
 # Inter (SIL Open Font License, see fonts/OFL.txt), loaded at startup.
-qt_add_resources(tratto "fonts"
+qt_add_resources(tratto_ui "fonts"
     PREFIX /fonts
     BASE fonts
     FILES fonts/InterVariable.ttf)
 
-target_compile_definitions(tratto PRIVATE
+target_compile_definitions(tratto_ui PUBLIC
     TRATTO_VERSION="${PROJECT_VERSION}"
     TRATTO_APP_ID="${TRATTO_APP_ID}")
-
-target_link_libraries(tratto PRIVATE
+target_include_directories(tratto_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(tratto_ui PUBLIC
     tratto_core
     tratto_render
     tratto_storage
     Qt6::Gui
     Qt6::Quick
     Qt6::QuickControls2)
-tratto_set_warnings(tratto)
+tratto_set_warnings(tratto_ui)
 
 # English is the source language; i18n/tratto_it.ts is compiled and embedded under :/i18n.
 # Refresh the .ts files after changing strings: cmake --build build --target update_translations
-qt_add_translations(tratto
+qt_add_translations(tratto_ui
     TS_FILE_BASE tratto
     TS_FILE_DIR ${PROJECT_SOURCE_DIR}/i18n
     RESOURCE_PREFIX /i18n
     LUPDATE_OPTIONS -no-obsolete)
 
+qt_add_executable(tratto main.cpp)
+target_link_libraries(tratto PRIVATE tratto_ui tratto_uiplugin)
+tratto_set_warnings(tratto)
 set_target_properties(tratto PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE)

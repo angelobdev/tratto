@@ -51,7 +51,7 @@ tratto/
 │   ├── render/     # tratto_render: QPainter rendering of pages and objects (tiles, thumbnails, export)
 │   ├── storage/    # tratto_storage: note bundles, groups, format and migrations
 │   ├── pdf/        # (from M4) tratto_pdf: PDF import, rasterization, annotated export (worker thread)
-│   └── app/        # executable: QML UI, canvas item, input handling, controllers exposed to QML
+│   └── app/        # tratto_ui (static: QML module, canvas item, input, controllers) + the `tratto` executable (main.cpp)
 │       └── qml/
 ├── tests/          # one Qt Test executable per library
 ├── i18n/           # tratto_it.ts (+ tratto_en.ts for English plural forms)
@@ -65,6 +65,7 @@ Dependency rule, enforced in CMake:
 - `core` links only `Qt6::Core`.
 - `render` and `storage` add `Qt6::Gui`, but **never** `Qt6::Quick` or `Qt6::Qml`.
 - Their tests run with `QT_QPA_PLATFORM=offscreen`, with no display.
+- The app code is the static library `tratto_ui` (C++ types and the `Tratto` QML module); the executable only adds `main.cpp`. App tests link `tratto_ui`; `tst_ui` loads the real `Main.qml` and drives it with mouse, touch and right clicks.
 - All the hard logic lives in these libraries and is tested there: geometry, eraser, selection, file format.
 
 ## 4. Data model (`core`)

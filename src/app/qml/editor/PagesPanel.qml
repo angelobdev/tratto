@@ -115,6 +115,7 @@ Rectangle {
             AbstractButton {
                 id: addPage
 
+                objectName: "addPage"
                 Layout.fillWidth: true
                 Layout.leftMargin: Theme.gapL
                 Layout.rightMargin: Theme.gapL

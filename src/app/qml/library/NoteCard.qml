@@ -8,6 +8,7 @@ import QtQuick.Layouts
 AbstractButton {
     id: control
 
+    objectName: "noteCard"
     required property var note // an entry of Library.notes
     // Reading Library.groups re-evaluates this when groups are renamed or deleted.
     readonly property var group: {

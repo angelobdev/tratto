@@ -34,6 +34,11 @@ Localization *Localization::create(QQmlEngine *, QJSEngine *)
     return s_instance;
 }
 
+Localization *Localization::instance()
+{
+    return s_instance;
+}
+
 void Localization::setInstance(Localization *instance)
 {
     s_instance = instance;

@@ -35,6 +35,7 @@ Rectangle {
         spacing: 6
 
         BackButton {
+            objectName: "editorBack"
             text: qsTr("Library")
             Accessible.name: qsTr("Back to the library")
             onClicked: bar.back()

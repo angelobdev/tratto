@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include "appearance.h"
-#include "library.h"
-#include "localization.h"
-#include "preferences.h"
+#include "appservices.h"
 
 #include <QCommandLineParser>
-#include <QFont>
-#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QQmlApplicationEngine>
@@ -15,6 +10,10 @@
 #include <QStandardPaths>
 #include <QSurfaceFormat>
 #include <QTimer>
+#include <QtQml/QQmlExtensionPlugin>
+
+// The QML module lives in the static tratto_ui library.
+Q_IMPORT_QML_PLUGIN(TrattoPlugin)
 
 Q_LOGGING_CATEGORY(lcApp, "tratto.app")
 
@@ -22,20 +21,6 @@ namespace {
 
 // Time for the first frames (fonts, thumbnails) to settle before a screenshot.
 constexpr int kScreenshotDelayMs = 1500;
-
-// Makes the bundled Inter the default UI font; falls back to the system font.
-void loadUiFont()
-{
-    const int id = QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/InterVariable.ttf"));
-    const QStringList families = QFontDatabase::applicationFontFamilies(id);
-    if (families.isEmpty()) {
-        qCWarning(lcApp) << "Could not load the bundled UI font, using the system font";
-        return;
-    }
-    QFont font(families.first());
-    font.setPixelSize(14);
-    QGuiApplication::setFont(font);
-}
 
 // Saves the first window to `path` once it has rendered, then quits.
 // Used for visual checks during development and in CI.
@@ -96,36 +81,25 @@ int main(int argc, char *argv[])
         { colorSchemeOption, languageOption, screenshotOption, pageOption, dataDirOption });
     parser.process(app);
 
-    loadUiFont();
+    AppServices::loadUiFont();
     // Basic is the most themeable Qt Quick Controls style; the look comes from Theme.qml.
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 
-    Appearance appearance(nullptr);
-    Appearance::setInstance(&appearance);
+    // Before the engine, so it is destroyed after it: editor sessions flush their
+    // last changes and the I/O thread finishes them before exit.
+    AppServices services(parser.isSet(dataDirOption)
+                             ? parser.value(dataDirOption)
+                             : QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     const QString scheme = parser.value(colorSchemeOption);
     if (scheme == QLatin1String("light"))
-        appearance.overrideMode(Appearance::Mode::Light);
+        services.appearance.overrideMode(Appearance::Mode::Light);
     else if (scheme == QLatin1String("dark"))
-        appearance.overrideMode(Appearance::Mode::Dark);
-
-    Localization localization(nullptr);
-    Localization::setInstance(&localization);
+        services.appearance.overrideMode(Appearance::Mode::Dark);
     if (parser.isSet(languageOption))
-        localization.overrideLanguage(parser.value(languageOption));
-
-    Preferences preferences(nullptr);
-    Preferences::setInstance(&preferences);
-
-    // Declared before the engine: destroyed after it, so editor sessions can flush
-    // their last changes and the I/O thread finishes them before exit.
-    const QString dataDir = parser.isSet(dataDirOption)
-        ? parser.value(dataDirOption)
-        : QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    Library library(dataDir, nullptr);
-    Library::setInstance(&library);
+        services.localization.overrideLanguage(parser.value(languageOption));
 
     QQmlApplicationEngine engine;
-    localization.setEngine(&engine);
+    services.localization.setEngine(&engine);
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);

@@ -6,6 +6,7 @@ import QtQuick.Controls
 Menu {
     id: menu
 
+    objectName: "groupMenu"
     property var group: ({})
 
     signal renameRequested()
