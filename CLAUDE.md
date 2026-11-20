@@ -14,7 +14,7 @@ If a decision changes, update `docs/ARCHITECTURE.md` in the same commit.
 
 ## Status
 
-Current milestone: **M1** (canvas item: one page with paper, pressure pen with stylus and mouse, zoom/pan, undo/redo). M0 is done. Update this line whenever a milestone is completed.
+Current milestone: **M2** (persistence: note bundles, SQLite index, autosave, library with real thumbnails and groups, New note dialog). M0 and M1 are done. Update this line whenever a milestone is completed.
 
 ## Commands
 
