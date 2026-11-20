@@ -25,7 +25,15 @@ tratto_add_test(tst_canvas
         ${TRATTO_APP_DIR}/editortools.h ${TRATTO_APP_DIR}/editortools.cpp
         ${TRATTO_APP_DIR}/notesession.h ${TRATTO_APP_DIR}/notesession.cpp
         ${TRATTO_APP_DIR}/preferences.h ${TRATTO_APP_DIR}/preferences.cpp
-    LIBS tratto_render Qt6::Quick)
+        ${TRATTO_APP_DIR}/library.h ${TRATTO_APP_DIR}/library.cpp
+    LIBS tratto_render tratto_storage Qt6::Quick)
 target_include_directories(tst_canvas PRIVATE ${TRATTO_APP_DIR})
 # Keep the test from touching the user's settings.
 set_property(TEST tst_canvas APPEND PROPERTY ENVIRONMENT "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/test-config")
+
+tratto_add_test(tst_library
+    SOURCES app/tst_library.cpp
+        ${TRATTO_APP_DIR}/library.h ${TRATTO_APP_DIR}/library.cpp
+        ${TRATTO_APP_DIR}/notesession.h ${TRATTO_APP_DIR}/notesession.cpp
+    LIBS tratto_render tratto_storage Qt6::Qml)
+target_include_directories(tst_library PRIVATE ${TRATTO_APP_DIR})

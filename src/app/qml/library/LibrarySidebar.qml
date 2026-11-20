@@ -11,6 +11,10 @@ Rectangle {
     property string section: "all"
 
     signal settingsRequested()
+    signal newGroupRequested()
+    signal groupMenuRequested(var group)
+
+    readonly property var liveNotes: Library.notes.filter(n => !n.inTrash)
 
     implicitWidth: Theme.sidebarWidth
     color: Theme.sidebar
@@ -64,7 +68,7 @@ Rectangle {
             Layout.fillWidth: true
             text: qsTr("All notes")
             iconName: "notebook-text"
-            count: FakeLibrary.notes.length
+            count: sidebar.liveNotes.length
             current: sidebar.section === "all"
             onClicked: sidebar.section = "all"
         }
@@ -81,7 +85,7 @@ Rectangle {
             Layout.fillWidth: true
             text: qsTr("Standalone notes")
             iconName: "file"
-            count: FakeLibrary.notesInGroup("").length
+            count: sidebar.liveNotes.filter(n => n.group === "").length
             current: sidebar.section === "standalone"
             onClicked: sidebar.section = "standalone"
         }
@@ -106,23 +110,30 @@ Rectangle {
             IconButton {
                 text: qsTr("New group")
                 iconName: "plus"
-                enabled: false // groups are created in M2
-                opacity: enabled ? 1 : 0.4
+                onClicked: sidebar.newGroupRequested()
             }
         }
 
         Repeater {
-            model: FakeLibrary.groups
+            model: Library.groups
 
             delegate: NavItem {
+                id: groupItem
+
                 required property var modelData
 
                 Layout.fillWidth: true
                 text: modelData.name
                 groupColor: modelData.color
-                count: FakeLibrary.notesInGroup(modelData.id).length
+                count: sidebar.liveNotes.filter(n => n.group === modelData.id).length
                 current: sidebar.section === "group:" + modelData.id
                 onClicked: sidebar.section = "group:" + modelData.id
+                onPressAndHold: sidebar.groupMenuRequested(modelData)
+
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: sidebar.groupMenuRequested(groupItem.modelData)
+                }
             }
         }
 
@@ -135,6 +146,7 @@ Rectangle {
             Layout.fillWidth: true
             text: qsTr("Trash")
             iconName: "trash"
+            count: Library.notes.filter(n => n.inTrash).length || -1
             current: sidebar.section === "trash"
             onClicked: sidebar.section = "trash"
         }

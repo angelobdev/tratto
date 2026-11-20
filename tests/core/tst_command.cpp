@@ -159,6 +159,21 @@ private slots:
         QVERIFY(!stack.canUndo());
     }
 
+    void addPageAndUndo()
+    {
+        Document doc = makeDocument();
+        UndoStack stack;
+        const Page page = Page::create(PaperStyle { });
+        stack.push(doc, std::make_unique<AddPage>(page, 99)); // clamped: appended
+        QCOMPARE(doc.pages.size(), 2u);
+        QCOMPARE(doc.pages[1].id, page.id);
+        QVERIFY(doc.infoDirty);
+        QVERIFY(doc.dirtyPages.contains(page.id));
+        stack.undo(doc);
+        QCOMPARE(doc.pages.size(), 1u);
+        QVERIFY(!doc.dirtyPages.contains(page.id));
+    }
+
     void unknownPageIsIgnored()
     {
         Document doc = makeDocument();

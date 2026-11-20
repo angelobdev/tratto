@@ -64,4 +64,12 @@ inline constexpr std::array<Rgba, 8> kAccentPresets = {
     Rgba::fromRgb(0x1971C2), Rgba::fromRgb(0x495057),
 };
 
+// Group colors, in display order: violet, orange, green, blue, red, yellow, pink,
+// graphite. The first three come from the design; the rest extend the palette.
+inline constexpr std::array<Rgba, 8> kGroupColors = {
+    Rgba::fromRgb(0xAE3EC9), Rgba::fromRgb(0xE8590C), Rgba::fromRgb(0x0CA678),
+    Rgba::fromRgb(0x1C7ED6), Rgba::fromRgb(0xE03131), Rgba::fromRgb(0xF59F00),
+    Rgba::fromRgb(0xD6336C), Rgba::fromRgb(0x495057),
+};
+
 } // namespace tratto::core

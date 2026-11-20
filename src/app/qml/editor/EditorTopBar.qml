@@ -7,14 +7,16 @@ import QtQuick.Layouts
 Rectangle {
     id: bar
 
-    required property var note
     required property NoteSession session
     property bool pagesPanelOpen: true
 
     signal back()
     signal togglePagesPanel()
 
-    readonly property var group: FakeLibrary.group(note.group)
+    readonly property var group: {
+        Library.groups
+        return session.groupId !== "" ? Library.group(session.groupId) : ({})
+    }
 
     implicitHeight: Theme.topBarHeight
     color: Theme.surface
@@ -47,19 +49,45 @@ Rectangle {
             Layout.maximumWidth: implicitWidth
             spacing: 10
 
-            Label {
+            // Title: click to rename.
+            TextField {
+                id: titleField
+
                 Layout.fillWidth: true
-                Layout.minimumWidth: 60
-                text: bar.note.title
-                elide: Text.ElideRight
+                Layout.minimumWidth: 80
+                Layout.preferredWidth: Math.max(80, contentWidth + leftPadding + rightPadding + 4)
+                implicitHeight: 36
+                leftPadding: 6
+                rightPadding: 6
+                text: bar.session.title
+                placeholderText: qsTr("Untitled note")
                 color: Theme.text
+                placeholderTextColor: Theme.textMuted
                 font.pixelSize: Theme.fontSection
                 font.weight: Font.DemiBold
+                selectByMouse: true
+                Accessible.name: qsTr("Note title")
+                onEditingFinished: {
+                    bar.session.title = text
+                    focus = false
+                }
+                Keys.onEscapePressed: {
+                    text = bar.session.title
+                    focus = false
+                }
+
+                background: Rectangle {
+                    radius: 8
+                    color: titleField.activeFocus ? Theme.surface
+                         : titleField.hovered ? Theme.hover : "transparent"
+                    border.width: titleField.activeFocus ? 2 : 0
+                    border.color: Theme.accentInk
+                }
             }
 
             // Group chip
             Rectangle {
-                visible: bar.group !== null
+                visible: bar.group.id !== undefined
                 implicitWidth: chip.implicitWidth + 16
                 implicitHeight: 24
                 radius: 6
@@ -76,11 +104,11 @@ Rectangle {
                         width: 8
                         height: 8
                         radius: 2
-                        color: bar.group?.color ?? "transparent"
+                        color: bar.group.color ?? "transparent"
                     }
 
                     Label {
-                        text: bar.group?.name ?? ""
+                        text: bar.group.name ?? ""
                         color: Theme.textSecondary
                         font.pixelSize: Theme.fontLabel
                         font.weight: Font.Medium
@@ -89,7 +117,7 @@ Rectangle {
             }
         }
 
-        // Save status (static until autosave lands in M2)
+        // Save status
         RowLayout {
             spacing: 6
             Accessible.role: Accessible.StatusBar
@@ -98,10 +126,11 @@ Rectangle {
                 name: "check"
                 size: 16
                 color: Theme.textMuted
+                opacity: bar.session.saving ? 0 : 1
             }
 
             Label {
-                text: qsTr("Saved automatically")
+                text: bar.session.saving ? qsTr("Saving…") : qsTr("Saved automatically")
                 color: Theme.textMuted
                 font.pixelSize: 13
             }

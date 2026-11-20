@@ -515,6 +515,10 @@ void CanvasItem::onPageChanged(int index, QRectF bounds)
 {
     if (index != m_pageIndex || !m_session)
         return;
+    if (!m_snapshot) { // the note just finished loading
+        resetPage();
+        return;
+    }
     const core::Page *page = m_session->page(index);
     if (!page) {
         resetPage();

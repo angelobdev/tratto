@@ -238,11 +238,15 @@ notes/<note-id>/
   - every command marks the page it touches as dirty;
   - a save happens 500 ms after the last change, at most every 5 s during continuous writing;
   - it also always happens when leaving the editor, closing the window and on suspend.
+- **Who does what (app):**
+  - `Library` (QML singleton) holds every note's `NoteInfo` and the groups, and owns the I/O thread with the `NoteStore`. Work is queued to that thread in order; results come back as queued calls on the GUI thread. On exit it finishes every queued save before the thread stops.
+  - `NoteSession` (one per open editor) holds the `Document` and the undo history and schedules autosave; it saves on destruction too, so closing the editor or the app never loses the last strokes.
+  - Startup on the I/O thread: remove temporary files, purge the trash, read manifests and groups.
 - **Writes:**
   - they run on a **dedicated I/O thread**;
   - they are **atomic**: `QSaveFile` (tmp + fsync + rename);
   - only dirty pages are rewritten;
-  - the thumbnail is regenerated after saving, rate-limited.
+  - the thumbnail (first page, 480 px wide) is re-rendered on the I/O thread whenever a save includes the first page; the library reloads it through a revisioned URL.
 - **Versioning:** `format_version` in the manifest, migrations in `storage`, and a round-trip test for every version.
 - **Trash:** soft delete (`deleted_at`), emptied automatically after 30 days.
 - **Crash recovery:** leftover temporary files from a crash are ignored and removed at startup.
@@ -254,7 +258,9 @@ notes/<note-id>/
 - **Library:**
   - a sidebar (248 px): All notes, Recent, Standalone notes, Groups, Trash, Settings;
   - content: a `GridView` of thumbnails (or a list);
-  - search filters titles in memory.
+  - search filters titles in memory;
+  - note and group actions are in a context menu (right click, or press and hold with finger or stylus): open, rename, move to a group or out of it, move to the trash; in the trash: restore, delete forever, empty trash. Groups: create (name + color), rename, delete (its notes become standalone). Simple dialogs in the app's style; these screens are not in the design.
+  - the note title is edited in place in the editor's top bar.
 - **New note:** a dialog with a live preview of the paper.
 - **Settings:**
   - a page in the `StackView` (not a dialog): a section list on the left (General, Appearance, Pen and input, New notes, Export, Storage and backup, About) and the selected section on the right;
@@ -276,7 +282,7 @@ notes/<note-id>/
 - **Bundled assets:**
   - UI font: Inter (SIL OFL 1.1), in `src/app/fonts/`, set as the application font at startup;
   - icons: Lucide path data (ISC) in `qml/components/Icons.qml`, drawn by `Icon.qml` with Qt Quick Shapes, so they recolor with the theme and stay crisp at any scale.
-- **Development options:** `--color-scheme light|dark`, `--language <code>`, `--page library|settings|editor` and `--screenshot <file>` (saves the window and quits) for visual checks without a display.
+- **Development options:** `--data-dir <dir>` (notes somewhere other than the user data folder), `--color-scheme light|dark`, `--language <code>`, `--page library|settings|editor` and `--screenshot <file>` (saves the window and quits) for visual checks without a display.
 - **Strings:**
   - every user-visible string goes through `qsTr()` / `tr()`, in `app` only;
   - `core` returns error codes, never text.

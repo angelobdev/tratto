@@ -11,6 +11,7 @@ Rectangle {
     property int currentPage: 0
 
     signal pageClicked(int index)
+    signal addPageRequested()
 
     implicitWidth: 184
     color: Theme.surface
@@ -120,8 +121,8 @@ Rectangle {
                 Layout.bottomMargin: Theme.gapL
                 implicitHeight: Theme.controlHeight
                 text: qsTr("Add page")
-                enabled: false // pages are added through commands in M2
-                opacity: enabled ? 1 : 0.5
+                hoverEnabled: true
+                onClicked: panel.addPageRequested()
 
                 contentItem: Item {
                     Row {
@@ -147,7 +148,7 @@ Rectangle {
 
                 background: Rectangle {
                     radius: Theme.radiusControl
-                    color: "transparent"
+                    color: addPage.down ? Theme.pressed : addPage.hovered ? Theme.hover : "transparent"
                     border.width: 1.5
                     border.color: Theme.borderStrong
                 }

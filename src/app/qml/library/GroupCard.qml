@@ -7,11 +7,19 @@ import QtQuick.Layouts
 AbstractButton {
     id: control
 
-    required property var group      // { id, name, color, paper }
+    required property var group      // an entry of Library.groups
     required property int noteCount
     required property var lastModified
 
+    signal contextMenuRequested()
+
     implicitHeight: 88
+    onPressAndHold: contextMenuRequested()
+
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: control.contextMenuRequested()
+    }
     padding: 14
     hoverEnabled: true
     Accessible.name: group.name
@@ -47,7 +55,7 @@ AbstractButton {
                 rotation: 4
                 radius: 5
                 antialiasing: true
-                color: control.group.paper.color
+                color: "#FFFFFF"
                 border.color: Theme.border
 
                 Item {
@@ -56,7 +64,7 @@ AbstractButton {
                     clip: true
 
                     Repeater {
-                        model: control.group.paper.pattern === PaperThumbnail.Blank ? 0 : 8
+                        model: 8
 
                         Rectangle {
                             required property int index
@@ -68,7 +76,7 @@ AbstractButton {
                     }
 
                     Repeater {
-                        model: control.group.paper.pattern === PaperThumbnail.Grid ? 7 : 0
+                        model: 0
 
                         Rectangle {
                             required property int index

@@ -5,7 +5,6 @@ set_source_files_properties(
     qml/Theme.qml
     qml/Format.qml
     qml/components/Icons.qml
-    qml/library/FakeLibrary.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(tratto
@@ -16,6 +15,9 @@ qt_add_qml_module(tratto
         qml/Theme.qml
         qml/Format.qml
         qml/components/AppButton.qml
+        qml/components/AppDialog.qml
+        qml/components/ConfirmDialog.qml
+        qml/components/TextPromptDialog.qml
         qml/components/AppSwitch.qml
         qml/components/BackButton.qml
         qml/components/CheckOption.qml
@@ -34,8 +36,10 @@ qt_add_qml_module(tratto
         qml/editor/PagesPanel.qml
         qml/editor/ToolRow.qml
         qml/editor/ZoomControl.qml
-        qml/library/FakeLibrary.qml
-        qml/library/GroupCard.qml
+            qml/library/GroupCard.qml
+        qml/library/GroupDialog.qml
+        qml/library/GroupMenu.qml
+        qml/library/NoteMenu.qml
         qml/library/LibraryPage.qml
         qml/library/LibrarySidebar.qml
         qml/library/NoteCard.qml
@@ -57,6 +61,7 @@ qt_add_qml_module(tratto
         paperthumbnail.h paperthumbnail.cpp
         editortools.h editortools.cpp
         notesession.h notesession.cpp
+        library.h library.cpp
         canvasitem.h canvasitem.cpp
 )
 
@@ -73,6 +78,7 @@ target_compile_definitions(tratto PRIVATE
 target_link_libraries(tratto PRIVATE
     tratto_core
     tratto_render
+    tratto_storage
     Qt6::Gui
     Qt6::Quick
     Qt6::QuickControls2)

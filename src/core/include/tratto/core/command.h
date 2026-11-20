@@ -58,6 +58,19 @@ private:
     QRectF m_bounds;
 };
 
+// Inserts a page at `index` (clamped to the end).
+class AddPage final : public Command
+{
+public:
+    AddPage(Page page, std::size_t index);
+    Change apply(Document &doc) override;
+    Change revert(Document &doc) override;
+
+private:
+    Page m_page;
+    std::size_t m_index;
+};
+
 // Several commands undone and redone as one step (e.g. one eraser drag).
 class CommandGroup final : public Command
 {

@@ -8,6 +8,7 @@ Button {
     id: control
 
     property bool primary: false
+    property bool danger: false // destructive action: danger-colored text
     property string iconName
 
     implicitHeight: Theme.controlHeight
@@ -16,7 +17,7 @@ Button {
     font.pixelSize: 14
     font.weight: Font.DemiBold
 
-    readonly property color foreground: primary ? Theme.accentForeground : Theme.text
+    readonly property color foreground: primary ? Theme.accentForeground : danger ? Theme.danger : Theme.text
 
     contentItem: RowLayout {
         spacing: Theme.gapS

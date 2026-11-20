@@ -83,6 +83,29 @@ Change RemoveObjects::revert(Document &doc)
     return { m_page, m_bounds };
 }
 
+AddPage::AddPage(Page page, std::size_t index)
+    : m_page(std::move(page))
+    , m_index(index)
+{
+}
+
+Change AddPage::apply(Document &doc)
+{
+    const auto index = static_cast<std::ptrdiff_t>(std::min(m_index, doc.pages.size()));
+    doc.pages.insert(doc.pages.begin() + index, m_page);
+    doc.dirtyPages.insert(m_page.id);
+    doc.infoDirty = true; // page order
+    return { m_page.id, { } };
+}
+
+Change AddPage::revert(Document &doc)
+{
+    std::erase_if(doc.pages, [this](const Page &p) { return p.id == m_page.id; });
+    doc.dirtyPages.erase(m_page.id);
+    doc.infoDirty = true;
+    return { m_page.id, { } };
+}
+
 Change CommandGroup::apply(Document &doc)
 {
     Change total;

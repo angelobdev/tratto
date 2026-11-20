@@ -50,8 +50,17 @@ ApplicationWindow {
         Component.onCompleted: {
             if (window.startPage === "settings")
                 stack.push(settingsPage, {}, StackView.Immediate)
-            else if (window.startPage === "editor")
-                stack.push(editorPage, { note: FakeLibrary.notes[0] }, StackView.Immediate)
+        }
+
+        // --page editor opens the most recent note once the library is loaded.
+        Connections {
+            target: Library
+            enabled: window.startPage === "editor"
+            function onReadyChanged() {
+                const note = Library.notes.find(n => !n.inTrash)
+                if (note)
+                    stack.push(editorPage, { noteId: note.id }, StackView.Immediate)
+            }
         }
     }
 
@@ -59,7 +68,7 @@ ApplicationWindow {
         id: libraryPage
 
         LibraryPage {
-            onOpenNote: note => stack.push(editorPage, { note: note })
+            onOpenNote: noteId => stack.push(editorPage, { noteId: noteId })
             onOpenSettings: stack.push(settingsPage)
         }
     }

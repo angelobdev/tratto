@@ -1,16 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 
 // Note card: page thumbnail, title, group and last modification time.
 AbstractButton {
     id: control
 
-    required property var note // see FakeLibrary.notes
-    readonly property var group: FakeLibrary.group(note.group)
+    required property var note // an entry of Library.notes
+    // Reading Library.groups re-evaluates this when groups are renamed or deleted.
+    readonly property var group: {
+        Library.groups
+        return note.group !== "" ? Library.group(note.group) : ({})
+    }
+    readonly property bool hasGroup: group.id !== undefined
+
+    signal contextMenuRequested()
 
     hoverEnabled: true
+    onPressAndHold: contextMenuRequested() // touch and stylus
+
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: control.contextMenuRequested()
+    }
     padding: 0
     Accessible.name: note.title
 
@@ -22,12 +36,44 @@ AbstractButton {
             Layout.fillWidth: true
             Layout.preferredHeight: width * 297 / 210
 
+            // Paper only, until the saved thumbnail (with the writing) is loaded.
             PaperThumbnail {
                 anchors.fill: parent
                 radius: 10
+                visible: thumbnail.status !== Image.Ready
                 pattern: control.note.paper.pattern
                 spacingMm: control.note.paper.spacingMm
                 paperColor: control.note.paper.color
+            }
+
+            Image {
+                id: thumbnail
+
+                anchors.fill: parent
+                visible: false // drawn through the rounded mask below
+                source: control.note.thumbnail
+                asynchronous: true
+                fillMode: Image.PreserveAspectCrop
+                sourceSize.width: width * Screen.devicePixelRatio
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                visible: thumbnail.status === Image.Ready
+                source: thumbnail
+                maskEnabled: true
+                maskSource: roundedMask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
+            }
+
+            Rectangle {
+                id: roundedMask
+
+                anchors.fill: parent
+                radius: 10
+                visible: false
+                layer.enabled: true
             }
 
             Rectangle {
@@ -70,7 +116,7 @@ AbstractButton {
 
             Label {
                 Layout.fillWidth: true
-                text: control.note.title
+                text: control.note.title !== "" ? control.note.title : qsTr("Untitled note")
                 elide: Text.ElideRight
                 color: Theme.text
                 font.pixelSize: 14
@@ -86,15 +132,16 @@ AbstractButton {
                     implicitWidth: 8
                     implicitHeight: 8
                     radius: 2
-                    color: control.group ? control.group.color : "transparent"
-                    border.width: control.group ? 0 : 1.5
+                    color: control.hasGroup ? control.group.color : "transparent"
+                    border.width: control.hasGroup ? 0 : 1.5
                     border.color: Theme.standaloneMarker
                 }
 
                 Label {
                     Layout.fillWidth: true
-                    text: (control.group ? control.group.name : qsTr("Standalone note"))
-                          + " · " + Format.noteTimestamp(control.note.modified)
+                    text: (control.hasGroup ? control.group.name : qsTr("Standalone note"))
+                          + " · " + (control.note.inTrash ? qsTr("Deleted %1").arg(Format.noteTimestamp(control.note.deleted))
+                                                          : Format.noteTimestamp(control.note.modified))
                     elide: Text.ElideRight
                     color: Theme.textMuted
                     font.pixelSize: Theme.fontLabel

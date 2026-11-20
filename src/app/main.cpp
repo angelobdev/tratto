@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "appearance.h"
+#include "library.h"
 #include "localization.h"
 #include "preferences.h"
 
@@ -11,6 +12,7 @@
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
+#include <QStandardPaths>
 #include <QSurfaceFormat>
 #include <QTimer>
 
@@ -85,7 +87,12 @@ int main(int argc, char *argv[])
         QStringLiteral("page"),
         QStringLiteral("Open <page> at startup: library, settings or editor (development)."),
         QStringLiteral("page"), QStringLiteral("library"));
-    parser.addOptions({ colorSchemeOption, languageOption, screenshotOption, pageOption });
+    const QCommandLineOption dataDirOption(
+        QStringLiteral("data-dir"),
+        QStringLiteral("Keep notes in <dir> instead of the user data folder (development)."),
+        QStringLiteral("dir"));
+    parser.addOptions(
+        { colorSchemeOption, languageOption, screenshotOption, pageOption, dataDirOption });
     parser.process(app);
 
     loadUiFont();
@@ -107,6 +114,14 @@ int main(int argc, char *argv[])
 
     Preferences preferences(nullptr);
     Preferences::setInstance(&preferences);
+
+    // Declared before the engine: destroyed after it, so editor sessions can flush
+    // their last changes and the I/O thread finishes them before exit.
+    const QString dataDir = parser.isSet(dataDirOption)
+        ? parser.value(dataDirOption)
+        : QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    Library library(dataDir, nullptr);
+    Library::setInstance(&library);
 
     QQmlApplicationEngine engine;
     localization.setEngine(&engine);

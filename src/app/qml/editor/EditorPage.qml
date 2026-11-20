@@ -8,20 +8,25 @@ import QtQuick.Layouts
 Page {
     id: page
 
-    // { title, group, paper: { pattern, spacingMm, color } }, see FakeLibrary.
-    required property var note
+    required property string noteId
 
     signal back()
 
-    // Placeholder pages until notes are stored (M2): three pages of the note's paper.
-    readonly property var pages: [note.paper, note.paper, note.paper]
     property bool pagesPanelOpen: true
+
+    // Saves what is pending before leaving; the session also saves on destruction.
+    function leave() {
+        session.flush()
+        page.back()
+    }
 
     NoteSession {
         id: session
 
-        Component.onCompleted: createBlank(page.note.paper.pattern, page.note.paper.spacingMm,
-                                           page.note.paper.color, page.pages.length)
+        Component.onCompleted: open(page.noteId)
+        onLoadFailed: page.back()
+        // Keep the canvas on an existing page when pages are removed (undo of Add page).
+        onPageCountChanged: if (canvas.pageIndex >= pageCount) canvas.pageIndex = Math.max(0, pageCount - 1)
     }
 
     EditorTools { id: tools }
@@ -45,10 +50,9 @@ Page {
 
         EditorTopBar {
             Layout.fillWidth: true
-            note: page.note
             session: session
             pagesPanelOpen: page.pagesPanelOpen
-            onBack: page.back()
+            onBack: page.leave()
             onTogglePagesPanel: page.pagesPanelOpen = !page.pagesPanelOpen
         }
 
@@ -93,9 +97,13 @@ Page {
         PagesPanel {
             visible: page.pagesPanelOpen
             Layout.fillHeight: true
-            pages: page.pages
+            pages: session.pages
             currentPage: canvas.pageIndex
             onPageClicked: index => canvas.pageIndex = index
+            onAddPageRequested: {
+                session.addPage()
+                canvas.pageIndex = session.pageCount - 1
+            }
         }
     }
 }
