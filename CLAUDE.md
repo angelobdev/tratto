@@ -14,7 +14,7 @@ If a decision changes, update `docs/ARCHITECTURE.md` in the same commit.
 
 ## Status
 
-Current milestone: **M2** (persistence: note bundles, groups, autosave, library with real thumbnails and groups, New note dialog). M0 and M1 are done. Update this line whenever a milestone is completed.
+Current milestone: **M3** (highlighter, eraser in both modes, lasso/rectangle selection with actions, text, images). M0, M1 and M2 are done. Update this line whenever a milestone is completed.
 
 ## Commands
 
