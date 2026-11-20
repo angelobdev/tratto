@@ -202,6 +202,82 @@ private slots:
         QTRY_COMPARE(depth(), 2);
     }
 
+    // Opens the first note and returns its canvas (nullptr on failure).
+    CanvasItem *openEditor()
+    {
+        click(cards().first());
+        if (!QTest::qWaitFor([&] { return depth() == 2 && !busy() && !items("canvas").isEmpty(); }))
+            return nullptr;
+        auto *canvas = qobject_cast<CanvasItem *>(items("canvas").first());
+        return QTest::qWaitFor([&] { return canvas->session()->loaded(); }) ? canvas : nullptr;
+    }
+
+    // Mouse drag on the canvas, in canvas coordinates.
+    void dragOn(CanvasItem *canvas, QPointF from, QPointF to)
+    {
+        const QPointF origin = canvas->mapToScene(QPointF(0, 0));
+        QTest::mousePress(m_window, Qt::LeftButton, { }, (origin + from).toPoint());
+        for (int i = 1; i <= 12; ++i)
+            QTest::mouseMove(m_window, (origin + from + (to - from) * i / 12.0).toPoint());
+        QTest::mouseRelease(m_window, Qt::LeftButton, { }, (origin + to).toPoint());
+    }
+
+    void selectionMenuRecolors()
+    {
+        CanvasItem *canvas = openEditor();
+        QVERIFY(canvas);
+        dragOn(canvas, { 300, 200 }, { 400, 200 });
+        canvas->tools()->setTool(EditorTools::Tool::Select);
+        canvas->tools()->setProperty("selectionMode",
+                                     QVariant::fromValue(EditorTools::SelectionMode::Rectangle));
+        dragOn(canvas, { 280, 180 }, { 420, 220 });
+        QTRY_VERIFY(!items("selectionColor").isEmpty());
+        click(items("selectionColor").first());
+        QTRY_VERIFY(!items("selectionSwatch2").isEmpty()); // red
+        dump("selection-colors");
+        click(items("selectionSwatch2").first());
+        const auto &stroke = std::get<tratto::core::Stroke>(canvas->session()->page(0)->objects[0]);
+        QCOMPARE(stroke.color, tratto::core::Rgba::fromRgb(0xE03131));
+        QVERIFY(canvas->hasSelection()); // still selected
+    }
+
+    void eraserHighlighterOnlyFromTheToolbar()
+    {
+        CanvasItem *canvas = openEditor();
+        QVERIFY(canvas);
+        EditorTools *tools = canvas->tools();
+        dragOn(canvas, { 250, 300 }, { 450, 300 }); // ink
+        tools->setTool(EditorTools::Tool::Highlighter);
+        dragOn(canvas, { 250, 300 }, { 450, 300 }); // highlighter over it
+        QCOMPARE(canvas->session()->page(0)->objects.size(), 2u);
+
+        tools->setTool(EditorTools::Tool::Eraser);
+        QTRY_VERIFY(!items("eraseHighlighterOnly").isEmpty());
+        click(items("eraseHighlighterOnly").first()); // the real checkbox
+        QVERIFY(tools->eraseHighlighterOnly());
+        dragOn(canvas, { 350, 250 }, { 350, 350 });
+        {
+            const auto &objects = canvas->session()->page(0)->objects;
+            QCOMPARE(objects.size(), 1u);
+            QCOMPARE(std::get<tratto::core::Stroke>(objects[0]).tool,
+                     tratto::core::StrokeTool::Pen);
+        }
+
+        // Partial mode too: the highlighter is cut, the ink stays whole.
+        tools->setTool(EditorTools::Tool::Highlighter);
+        dragOn(canvas, { 250, 300 }, { 450, 300 });
+        tools->setTool(EditorTools::Tool::Eraser);
+        tools->setProperty("eraserMode", QVariant::fromValue(EditorTools::EraserMode::Partial));
+        dragOn(canvas, { 350, 250 }, { 350, 350 });
+        int pens = 0, highlighters = 0;
+        for (const auto &o : canvas->session()->page(0)->objects)
+            (std::get<tratto::core::Stroke>(o).tool == tratto::core::StrokeTool::Pen
+                 ? pens
+                 : highlighters)++;
+        QCOMPARE(pens, 1);
+        QCOMPARE(highlighters, 2);
+    }
+
     void selectionMenuDeletesTheSelection()
     {
         click(cards().first());

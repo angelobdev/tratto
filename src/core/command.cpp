@@ -105,7 +105,10 @@ Change ReplaceObjects::apply(Document &doc)
             result.push_back(std::move(object));
             continue;
         }
+        // Both the old and the new area need repainting, on apply and on revert.
         m_bounds |= objectBounds(object);
+        for (const Object &piece : r->pieces)
+            m_bounds |= objectBounds(piece);
         // Index in the new list, so revert can put it back in the same place.
         m_originals.emplace_back(result.size(), std::move(object));
         result.insert(result.end(), r->pieces.begin(), r->pieces.end());

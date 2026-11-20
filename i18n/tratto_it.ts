@@ -840,29 +840,34 @@
 <context>
     <name>SelectionMenu</name>
     <message>
-        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="55"/>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="69"/>
         <source>Copy</source>
         <translation>Copia</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="56"/>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="74"/>
         <source>Cut</source>
         <translation>Taglia</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="57"/>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="79"/>
         <source>Duplicate</source>
         <translation>Duplica</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="61"/>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="85"/>
         <source>Color</source>
         <translation>Colore</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="66"/>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="91"/>
         <source>Delete</source>
         <translation>Elimina</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="102"/>
+        <source>Back</source>
+        <translation>Indietro</translation>
     </message>
 </context>
 <context>
@@ -1083,67 +1088,67 @@
         <translation>Gomma grande</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="348"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="349"/>
         <source>Highlighter only</source>
         <translation>Solo evidenziatore</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="360"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="361"/>
         <source>Font</source>
         <translation>Carattere</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="363"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="364"/>
         <source>Serif</source>
         <translation>Serif</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="364"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="365"/>
         <source>Monospace</source>
         <translation>Monospace</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="371"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="372"/>
         <source>Size</source>
         <translation>Dimensione</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="378"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="379"/>
         <source>Bold</source>
         <translation>Grassetto</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="392"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="393"/>
         <source>Italic</source>
         <translation>Corsivo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="434"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="435"/>
         <source>Freeform</source>
         <translation>Libera</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="435"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="436"/>
         <source>Rectangle</source>
         <translation>Rettangolo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="443"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="444"/>
         <source>Drag around strokes, text or images</source>
         <translation>Trascina attorno a tratti, testo o immagini</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="459"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="460"/>
         <source>From file…</source>
         <translation>Da file…</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="469"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="470"/>
         <source>From clipboard</source>
         <translation>Dagli appunti</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/ToolRow.qml" line="477"/>
+        <location filename="../src/app/qml/editor/ToolRow.qml" line="478"/>
         <source>Or drag an image onto the page</source>
         <translation>Oppure trascina un&apos;immagine sulla pagina</translation>
     </message>

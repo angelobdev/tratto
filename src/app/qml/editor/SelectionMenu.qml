@@ -46,63 +46,100 @@ Rectangle {
         }
     }
 
+    // Picking a color replaces the actions inside the same pill: everything stays in
+    // the menu's area, where the stylus reaches the menu instead of the canvas.
+    property bool pickingColor: false
+
+    Connections {
+        target: menu.canvas
+        function onSelectionChanged() {
+            if (!menu.canvas.hasSelection || menu.canvas.selectionBusy)
+                menu.pickingColor = false
+        }
+    }
+
     RowLayout {
         id: row
 
         anchors.centerIn: parent
         spacing: 2
 
-        Action { text: qsTr("Copy"); onClicked: menu.canvas.copySelection() }
-        Action { text: qsTr("Cut"); onClicked: menu.canvas.cutSelection() }
-        Action { text: qsTr("Duplicate"); onClicked: menu.canvas.duplicateSelection() }
         Action {
-            id: colorAction
-
+            visible: !menu.pickingColor
+            text: qsTr("Copy")
+            onClicked: menu.canvas.copySelection()
+        }
+        Action {
+            visible: !menu.pickingColor
+            text: qsTr("Cut")
+            onClicked: menu.canvas.cutSelection()
+        }
+        Action {
+            visible: !menu.pickingColor
+            text: qsTr("Duplicate")
+            onClicked: menu.canvas.duplicateSelection()
+        }
+        Action {
+            objectName: "selectionColor"
+            visible: !menu.pickingColor
             text: qsTr("Color")
-            onClicked: colorPopup.open()
+            onClicked: menu.pickingColor = true
         }
         Action {
             objectName: "selectionDelete"
+            visible: !menu.pickingColor
             text: qsTr("Delete")
             textColor: "#FFA8A8"
             onClicked: menu.canvas.deleteSelection()
         }
-    }
 
-    Popup {
-        id: colorPopup
+        // Color choices
+        AbstractButton {
+            visible: menu.pickingColor
+            implicitWidth: 36
+            implicitHeight: 40
+            hoverEnabled: true
+            text: qsTr("Back")
+            Accessible.name: text
+            onClicked: menu.pickingColor = false
 
-        y: menu.height + 6
-        x: colorAction.x
-        padding: 6
-
-        background: Rectangle {
-            radius: Theme.radiusCard
-            color: "#18181B"
+            contentItem: Item {
+                Icon {
+                    anchors.centerIn: parent
+                    name: "chevron-left"
+                    size: 18
+                    strokeWidth: 2
+                    color: "#FFFFFF"
+                }
+            }
+            background: Rectangle {
+                radius: 8
+                color: parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+            }
         }
 
-        contentItem: Row {
-            spacing: 2
+        Repeater {
+            model: menu.pickingColor ? menu.tools.penColors : []
 
-            Repeater {
-                model: menu.tools.penColors
+            delegate: AbstractButton {
+                id: swatch
 
-                delegate: AbstractButton {
-                    id: swatch
+                required property color modelData
+                required property int index
 
-                    required property color modelData
+                objectName: "selectionSwatch" + index
+                implicitWidth: 36
+                implicitHeight: 40
+                hoverEnabled: true
+                Accessible.name: modelData.toString()
+                onClicked: {
+                    menu.canvas.recolorSelection(modelData)
+                    menu.pickingColor = false
+                }
 
-                    implicitWidth: 36
-                    implicitHeight: 36
-                    hoverEnabled: true
-                    Accessible.name: modelData.toString()
-                    onClicked: {
-                        menu.canvas.recolorSelection(modelData)
-                        colorPopup.close()
-                    }
-
-                    contentItem: Item {}
-                    background: Rectangle {
+                contentItem: Item {}
+                background: Item {
+                    Rectangle {
                         anchors.centerIn: parent
                         width: swatch.hovered ? 26 : 22
                         height: width

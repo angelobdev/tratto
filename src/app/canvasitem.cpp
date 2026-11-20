@@ -451,8 +451,11 @@ void CanvasItem::onPageChanged(int index, QRectF bounds)
     refreshSnapshot();
     if (!m_selection.empty() && !selectionBusy())
         refreshSelection(); // undo/redo may have removed or moved selected objects
-    // Pending strokes that are gone (undo) disappear at once.
-    std::erase_if(m_pending, [page](const PendingStroke &p) { return !page->find(p.id); });
+    // Pending strokes that are gone or changed (undo of add / move) disappear at once.
+    std::erase_if(m_pending, [page](const PendingStroke &p) {
+        const core::Object *object = page->find(p.id);
+        return !object || core::objectBounds(*object) != p.bounds;
+    });
     m_pendingDirty = true;
     invalidate(bounds);
     update();

@@ -345,6 +345,7 @@ Rectangle {
                 Divider {}
 
                 CheckOption {
+                    objectName: "eraseHighlighterOnly"
                     text: qsTr("Highlighter only")
                     checked: bar.tools.eraseHighlighterOnly
                     onToggled: bar.tools.eraseHighlighterOnly = checked

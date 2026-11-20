@@ -184,6 +184,29 @@ private slots:
         QCOMPARE(idsOn(doc.pages[0]), (std::vector { b1.id, b2.id, before[3] }));
     }
 
+    void replaceReportsOldAndNewArea()
+    {
+        // Undoing a move must repaint where the object was moved to, too.
+        Document doc = makeDocument();
+        const PageId page = doc.pages[0].id;
+        UndoStack stack;
+        const Stroke s = makeStroke(0);
+        stack.push(doc, std::make_unique<AddObjects>(page, std::vector<Object> { s }));
+        Stroke moved = s;
+        for (StrokePoint &p : moved.points)
+            p.y += 300;
+        moved.updateBounds();
+        std::vector<ReplaceObjects::Replacement> r;
+        r.push_back({ s.id, { moved } });
+        const Change applied
+            = stack.push(doc, std::make_unique<ReplaceObjects>(page, std::move(r)));
+        QVERIFY(applied.bounds.contains(s.bbox));
+        QVERIFY(applied.bounds.contains(moved.bbox));
+        const auto undone = stack.undo(doc);
+        QVERIFY(undone->bounds.contains(moved.bbox));
+        QVERIFY(undone->bounds.contains(s.bbox));
+    }
+
     void addPageAndUndo()
     {
         Document doc = makeDocument();
