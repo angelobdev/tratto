@@ -5,6 +5,7 @@
 #include "tratto/core/ids.h"
 #include "tratto/core/paper.h"
 
+#include <QDateTime>
 #include <QRectF>
 #include <QSizeF>
 #include <QString>
@@ -58,14 +59,39 @@ struct Page
     [[nodiscard]] const Object *find(ObjectId wanted) const;
 };
 
-struct Document
+// A note's metadata: what the library shows without opening the note.
+struct NoteInfo
 {
     NoteId id;
     QString title;
+    std::optional<GroupId> group; // nullopt = standalone note
+    QDateTime created;
+    QDateTime modified;
+    std::optional<QDateTime> deleted; // set = in the trash
+    PaperStyle defaultPaper; // for new pages
+    int pageCount = 0;
+
+    [[nodiscard]] bool inTrash() const { return deleted.has_value(); }
+};
+
+struct Group
+{
+    GroupId id;
+    QString name;
+    Rgba color;
+    int order = 0;
+};
+
+struct Document
+{
+    NoteInfo info;
     std::vector<Page> pages;
 
-    // Pages changed since the last save; commands add to it, storage clears it (M2).
+    // Changes not saved yet. Commands add pages to dirtyPages; storage clears both.
     std::set<PageId> dirtyPages;
+    bool infoDirty = false; // title, group, page order...
+
+    [[nodiscard]] bool isDirty() const { return infoDirty || !dirtyPages.empty(); }
 
     [[nodiscard]] Page *page(PageId wanted);
     [[nodiscard]] const Page *page(PageId wanted) const;

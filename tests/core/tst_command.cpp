@@ -19,7 +19,7 @@ Stroke makeStroke(float x)
 Document makeDocument()
 {
     Document doc;
-    doc.id = NoteId::create();
+    doc.info.id = NoteId::create();
     doc.pages.push_back(Page::create(PaperStyle { }));
     return doc;
 }

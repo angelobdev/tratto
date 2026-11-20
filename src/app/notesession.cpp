@@ -21,7 +21,7 @@ void NoteSession::createBlank(int pattern, qreal spacingMm, const QColor &paperC
             static_cast<std::uint8_t>(rgb.blue()), 255 };
 
     m_document = { };
-    m_document.id = core::NoteId::create();
+    m_document.info.id = core::NoteId::create();
     for (int i = 0; i < std::max(pages, 1); ++i)
         m_document.pages.push_back(core::Page::create(paper));
     m_history.clear();

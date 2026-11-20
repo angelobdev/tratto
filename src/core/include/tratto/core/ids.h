@@ -24,5 +24,6 @@ template<typename Tag> struct Id
 using ObjectId = Id<struct ObjectTag>;
 using PageId = Id<struct PageTag>;
 using NoteId = Id<struct NoteTag>;
+using GroupId = Id<struct GroupTag>;
 
 } // namespace tratto::core

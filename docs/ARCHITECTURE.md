@@ -26,7 +26,7 @@
 | PDF display | Qt PDF (`QPdfDocument`, PDFium-based) | Ships with Qt (LGPLv3). |
 | PDF export | `QPdfWriter` + **qpdf** (Apache-2.0) | qpdf overlays annotations onto the original pages (see §7). Added in M4. |
 | Images | `QImage` / `QImageReader` / `QImageWriter` | PNG, JPG, WEBP via Qt image plugins. |
-| Library index | Qt SQL with the SQLite driver | Index and cache only; can be rebuilt. |
+| Library index | None for now | The library reads every `manifest.json` on the I/O thread at startup. A SQLite cache (Qt SQL) is added when scanning gets slow or full-text search needs it. |
 | Serialization | CBOR (`QCborValue`) for pages, JSON (`QJsonDocument`) for the manifest | Both in QtCore. |
 | Spatial index | Uniform grid per page, in `core` | For eraser and selection hit-testing. Revisit if profiling says so. |
 | Paths | `QStandardPaths::AppDataLocation` | XDG on Linux, native folders on Windows and macOS. |
@@ -49,7 +49,7 @@ tratto/
 ├── src/
 │   ├── core/       # tratto_core: data model, stroke geometry, commands, undo/redo. QtCore only.
 │   ├── render/     # tratto_render: QPainter rendering of pages and objects (tiles, thumbnails, export)
-│   ├── storage/    # (from M2) tratto_storage: note bundles, SQLite index, autosave, migrations
+│   ├── storage/    # tratto_storage: note bundles, groups, format and migrations
 │   ├── pdf/        # (from M4) tratto_pdf: PDF import, rasterization, annotated export (worker thread)
 │   └── app/        # executable: QML UI, canvas item, input handling, controllers exposed to QML
 │       └── qml/
@@ -63,7 +63,7 @@ tratto/
 Dependency rule, enforced in CMake:
 
 - `core` links only `Qt6::Core`.
-- `render` and `storage` add `Qt6::Gui` (and `Qt6::Sql` for `storage`), but **never** `Qt6::Quick` or `Qt6::Qml`.
+- `render` and `storage` add `Qt6::Gui`, but **never** `Qt6::Quick` or `Qt6::Qml`.
 - Their tests run with `QT_QPA_PLATFORM=offscreen`, with no display.
 - All the hard logic lives in these libraries and is tested there: geometry, eraser, selection, file format.
 
@@ -116,6 +116,8 @@ struct Stroke {
 struct TextBox     { ObjectId id; QRectF rect; QString text; TextStyle style; };
 struct ImageObject { ObjectId id; AssetId asset; QRectF rect; Rotation90 rotation; };
 ```
+
+**Library actions** (rename, move to a group, trash, restore) change a note's `NoteInfo` directly through storage; they are not part of the editor's undo history.
 
 **Undo/redo:** every change is a `Command` (`AddObjects`, `RemoveObjects`, `ReplaceObjects`, `Transform{ids, affine}`, `EditText`, `AddPage`, …) with `apply` and `revert`. There is one in-memory stack per note, with a size limit. **The document is never modified outside a command.** Commands are also how autosave learns what is dirty.
 
@@ -220,16 +222,18 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
 Data folder: `QStandardPaths::AppDataLocation` (on Linux, `~/.local/share/tratto/`).
 
 ```text
-library.sqlite              # index: notes, groups, titles, dates, ordering, search text
+groups.json                 # groups: id, name, color, order (they belong to no single note)
 notes/<note-id>/
 ├── manifest.json           # metadata, format_version, page order, source
-├── pages/<page-id>.cbor    # page objects
+├── pages/<page-id>.cbor    # page: size, paper, objects; stroke points as packed float32 (x, y, pressure)
 ├── assets/                 # inserted images, source PDF/image
 └── thumb.png               # thumbnail of the first page, for the library
 ```
 
 - **Bundles are the source of truth.**
-  - SQLite is only a cache: if it is missing or corrupt, it is rebuilt by scanning `notes/`.
+  - The library list is built by reading the manifests; a note whose manifest can't be read is skipped and logged, never deleted.
+  - Save order: dirty pages, then the manifest, then page files the manifest no longer lists. A crash at any point leaves a loadable note.
+  - `format_version` covers the manifest and the page files. A note with a newer version is not opened (it would lose data on save).
 - **Autosave:**
   - every command marks the page it touches as dirty;
   - a save happens 500 ms after the last change, at most every 5 s during continuous writing;
@@ -250,7 +254,7 @@ notes/<note-id>/
 - **Library:**
   - a sidebar (248 px): All notes, Recent, Standalone notes, Groups, Trash, Settings;
   - content: a `GridView` of thumbnails (or a list);
-  - search queries SQLite.
+  - search filters titles in memory.
 - **New note:** a dialog with a live preview of the paper.
 - **Settings:**
   - a page in the `StackView` (not a dialog): a section list on the left (General, Appearance, Pen and input, New notes, Export, Storage and backup, About) and the selected section on the right;
@@ -294,7 +298,7 @@ notes/<note-id>/
 | --- | --- | --- |
 | **M0** | CMake project, window, Library ↔ Editor navigation with fake data, light/dark theme + accent color, i18n wiring (en + it) | The app opens, navigation works, the theme and language switch live |
 | **M1** | Canvas item: one page with paper, pressure pen (stylus) and mouse, zoom/pan, undo/redo | Writing with the stylus on a 2-in-1 feels fluid |
-| **M2** | Persistence: bundles, SQLite index, autosave, library with thumbnails and groups, New note dialog | Close and reopen without losing anything; killing the app causes no corruption |
+| **M2** | Persistence: bundles, groups, autosave, library with thumbnails and groups, New note dialog | Close and reopen without losing anything; killing the app causes no corruption |
 | **M3** | Highlighter, eraser (both modes), lasso/rectangle selection with actions, text, images | Every tool in the design works |
 | **M4** | PDF/image import, annotated-PDF export spike, PDF/PNG/JPG export | An exported annotated PDF opens correctly in other readers |
 | **M5** | Tablet mode, Stylus only and gestures, full settings, polish | Comfortable to use with stylus and fingers only |

@@ -26,6 +26,7 @@ enable_testing()
 
 add_subdirectory(src/core)
 add_subdirectory(src/render)
+add_subdirectory(src/storage)
 add_subdirectory(src/app)
 add_subdirectory(tests)
 

@@ -15,6 +15,7 @@ tratto_add_test(tst_command SOURCES core/tst_command.cpp LIBS tratto_core)
 tratto_add_test(tst_stroke_geometry SOURCES core/tst_stroke_geometry.cpp LIBS tratto_core)
 tratto_add_test(tst_paper_painter SOURCES render/tst_paper_painter.cpp LIBS tratto_render)
 tratto_add_test(tst_page_painter SOURCES render/tst_page_painter.cpp LIBS tratto_render)
+tratto_add_test(tst_storage SOURCES storage/tst_storage.cpp LIBS tratto_storage)
 
 # The canvas and its collaborators, compiled straight into the test.
 set(TRATTO_APP_DIR ${PROJECT_SOURCE_DIR}/src/app)
