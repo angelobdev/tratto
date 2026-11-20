@@ -5,13 +5,16 @@
 #include "canvasitem.h"
 #include "tratto/core/command.h"
 #include "tratto/render/page_painter.h"
+#include "tratto/render/text_painter.h"
 #include "tratto/storage/format.h"
 
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QMimeData>
 #include <QPainter>
+#include <QQuickWindow>
 #include <QSGFlatColorMaterial>
+#include <QSGImageNode>
 
 #include <algorithm>
 
@@ -154,11 +157,11 @@ void CanvasItem::refreshSnapshot()
         return;
     }
     auto copy = std::make_shared<core::Page>(*page);
-    if (m_lifted) {
-        std::erase_if(copy->objects, [this](const core::Object &o) {
-            return std::ranges::find(m_selection, core::objectId(o)) != m_selection.end();
-        });
-    }
+    std::erase_if(copy->objects, [this](const core::Object &o) {
+        const core::ObjectId id = core::objectId(o);
+        return (m_lifted && std::ranges::find(m_selection, id) != m_selection.end())
+            || (m_editing && m_editing->id == id);
+    });
     m_snapshot = std::move(copy);
 }
 
@@ -166,8 +169,26 @@ void CanvasItem::lift()
 {
     m_lifted = true;
     m_liftedTriangles.clear();
-    for (const core::Object &o : selectedObjects())
+    m_liftedImages.clear();
+    const double dpr = window() ? window()->effectiveDevicePixelRatio() : 1.0;
+    for (const core::Object &o : selectedObjects()) {
+        if (const auto *text = std::get_if<core::TextBox>(&o)) {
+            // Text has no triangles: draw it once into an image that follows the drag.
+            const double px = scale() * dpr;
+            QImage image((text->bbox.size() * px).toSize().expandedTo({ 1, 1 }),
+                         QImage::Format_ARGB32_Premultiplied);
+            image.fill(Qt::transparent);
+            QPainter painter(&image);
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.scale(px, px);
+            painter.translate(-text->bbox.topLeft());
+            tratto::render::paintTextBox(painter, *text);
+            painter.end();
+            m_liftedImages.emplace_back(image, text->bbox);
+            continue;
+        }
         m_liftedTriangles.emplace_back(objectColor(o), objectTriangles(o));
+    }
     ++m_generation;
     refreshSnapshot();
     invalidate(m_selectionBounds);
@@ -286,6 +307,7 @@ void CanvasItem::endSelectionGesture()
         invalidate(m_selectionBounds);
     }
     m_liftedTriangles.clear();
+    m_liftedImages.clear();
     setSelection(m_selection); // recompute bounds, reset the transform
 }
 
@@ -407,6 +429,15 @@ void CanvasItem::buildSelectionNodes(QSGNode *parent) const
         for (const QPointF &p : triangles)
             moved.push_back(m_dragTransform.map(p));
         parent->appendChildNode(makeTriangleNode(moved, color, m_offset, s));
+    }
+    for (const auto &[image, bbox] : m_liftedImages) {
+        QSGImageNode *node = window()->createImageNode();
+        node->setTexture(window()->createTextureFromImage(image));
+        node->setOwnsTexture(true);
+        node->setFiltering(QSGTexture::Linear);
+        const QRectF pt = m_dragTransform.mapRect(bbox);
+        node->setRect(QRectF(toItem(pt.topLeft()), pt.size() * s));
+        parent->appendChildNode(node);
     }
 
     std::vector<QPointF> outline; // item px

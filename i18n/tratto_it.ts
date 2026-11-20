@@ -944,6 +944,14 @@
     </message>
 </context>
 <context>
+    <name>TextBoxEditor</name>
+    <message>
+        <location filename="../src/app/qml/editor/TextBoxEditor.qml" line="37"/>
+        <source>Text</source>
+        <translation>Testo</translation>
+    </message>
+</context>
+<context>
     <name>ToolRow</name>
     <message>
         <location filename="../src/app/qml/editor/ToolRow.qml" line="126"/>

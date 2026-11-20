@@ -123,6 +123,62 @@ private slots:
                            std::get<core::Stroke>(page.objects[i]));
     }
 
+    void textBoxRoundTrip()
+    {
+        core::Page page = core::Page::create({ });
+        core::TextBox t;
+        t.id = core::ObjectId::create();
+        t.bbox = QRectF(50, 400, 300, 48);
+        t.text = QStringLiteral("Ricontrollare l'esercizio 4\nprima dell'esame — ∬ f dA");
+        t.font = core::TextFont::Serif;
+        t.size = 20.0F;
+        t.bold = true;
+        t.italic = true;
+        t.color = core::Rgba::fromRgb(0x1E3A8A);
+        page.objects.emplace_back(stroke(100));
+        page.objects.emplace_back(t);
+
+        const auto decoded = storage::decodePage(storage::encodePage(page));
+        QVERIFY(decoded.has_value());
+        QCOMPARE(decoded->objects.size(), 2u);
+        const auto &d = std::get<core::TextBox>(decoded->objects[1]);
+        QCOMPARE(d.id, t.id);
+        QCOMPARE(d.bbox, t.bbox);
+        QCOMPARE(d.text, t.text);
+        QCOMPARE(d.font, t.font);
+        QCOMPARE(d.size, t.size);
+        QCOMPARE(d.bold, true);
+        QCOMPARE(d.italic, true);
+        QCOMPARE(d.color, t.color);
+    }
+
+    void version1ManifestIsMigrated()
+    {
+        // A manifest written by format_version 1 (before text boxes).
+        const QByteArray v1 = R"({
+            "format_version": 1,
+            "id": "01a1f877-22e7-77f2-bdd8-052df6b0cc37",
+            "title": "Old note",
+            "group": null,
+            "created": "2026-11-19T10:00:00.000Z",
+            "modified": "2026-11-19T11:00:00.000Z",
+            "deleted": null,
+            "default_paper": { "pattern": "ruled", "spacing_mm": 6, "color": "#FFFFFF",
+                               "format": "a4", "orientation": "portrait" },
+            "pages": ["01a1f877-22e7-77f2-bdd8-052df6b0cc38"]
+        })";
+        const auto migrated = storage::migrateManifest(QJsonDocument::fromJson(v1).object());
+        QVERIFY(migrated.has_value());
+        QCOMPARE(migrated->value(QStringLiteral("format_version")).toInt(),
+                 storage::kFormatVersion);
+        const auto decoded = storage::decodeManifest(v1);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(decoded->info.title, QStringLiteral("Old note"));
+        QCOMPARE(decoded->pages.size(), 1u);
+        // Saved again, it is written with the current version.
+        QVERIFY(storage::encodeManifest(*decoded).contains("\"format_version\": 2"));
+    }
+
     void groupsRoundTrip()
     {
         const std::vector<core::Group> groups = {

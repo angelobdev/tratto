@@ -16,6 +16,7 @@ tratto_add_test(tst_stroke_geometry SOURCES core/tst_stroke_geometry.cpp LIBS tr
 tratto_add_test(tst_selection SOURCES core/tst_selection.cpp LIBS tratto_core)
 tratto_add_test(tst_paper_painter SOURCES render/tst_paper_painter.cpp LIBS tratto_render)
 tratto_add_test(tst_page_painter SOURCES render/tst_page_painter.cpp LIBS tratto_render)
+tratto_add_test(tst_text_painter SOURCES render/tst_text_painter.cpp LIBS tratto_render)
 tratto_add_test(tst_storage SOURCES storage/tst_storage.cpp LIBS tratto_storage)
 
 # App-level tests link the app library; tst_ui also loads its QML module.

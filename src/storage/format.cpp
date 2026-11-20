@@ -53,6 +53,11 @@ constexpr std::array<std::pair<Orientation, const char *>, 2> kOrientations = { 
     { Orientation::Portrait, "portrait" },
     { Orientation::Landscape, "landscape" },
 } };
+constexpr std::array<std::pair<core::TextFont, const char *>, 3> kFonts = { {
+    { core::TextFont::Sans, "sans" },
+    { core::TextFont::Serif, "serif" },
+    { core::TextFont::Monospace, "monospace" },
+} };
 constexpr std::array<std::pair<core::StrokeTool, const char *>, 2> kTools = { {
     { core::StrokeTool::Pen, "pen" },
     { core::StrokeTool::Highlighter, "highlighter" },
@@ -178,13 +183,17 @@ QByteArray encodeManifest(const Manifest &m)
 
 Result<QJsonObject> migrateManifest(QJsonObject manifest)
 {
-    const int version = manifest.value(QStringLiteral("format_version")).toInt(0);
+    int version = manifest.value(QStringLiteral("format_version")).toInt(0);
     if (version > kFormatVersion)
         return std::unexpected(
             Error { ErrorCode::NewerVersion, QStringLiteral("format_version %1").arg(version) });
     if (version < 1)
         return std::unexpected(corrupt(QStringLiteral("missing format_version")));
-    // Future steps go here, one per version: if (version == 1) { ...; version = 2; }
+    // One step per version.
+    if (version == 1) {
+        // 2 adds text boxes to pages; version 1 pages have none, so nothing changes.
+        version = 2;
+    }
     manifest.insert(QStringLiteral("format_version"), kFormatVersion);
     return manifest;
 }
@@ -235,6 +244,21 @@ QByteArray encodePage(const core::Page &page)
                 { QStringLiteral("width"), static_cast<double>(s->width) },
                 { QStringLiteral("points"), pointsToBytes(s->points) },
             });
+        } else if (const auto *t = std::get_if<core::TextBox>(&object)) {
+            objects.append(QCborMap {
+                { QStringLiteral("type"), QStringLiteral("text") },
+                { QStringLiteral("id"), idToString(t->id.value) },
+                { QStringLiteral("x"), t->bbox.x() },
+                { QStringLiteral("y"), t->bbox.y() },
+                { QStringLiteral("width"), t->bbox.width() },
+                { QStringLiteral("height"), t->bbox.height() },
+                { QStringLiteral("text"), t->text },
+                { QStringLiteral("font"), enumToString(t->font, kFonts) },
+                { QStringLiteral("size"), static_cast<double>(t->size) },
+                { QStringLiteral("bold"), t->bold },
+                { QStringLiteral("italic"), t->italic },
+                { QStringLiteral("color"), colorToString(t->color) },
+            });
         }
     }
     const QCborMap map {
@@ -265,9 +289,28 @@ Result<core::Page> decodePage(const QByteArray &cbor)
 
     for (const QCborValue &item : map.value(QStringLiteral("objects")).toArray()) {
         const QCborMap o = item.toMap();
+        const QString type = o.value(QStringLiteral("type")).toString();
+        if (type == QLatin1String("text")) {
+            core::TextBox t;
+            t.id = { uuidFrom(o.value(QStringLiteral("id")).toString()) };
+            t.bbox = QRectF(o.value(QStringLiteral("x")).toDouble(),
+                            o.value(QStringLiteral("y")).toDouble(),
+                            o.value(QStringLiteral("width")).toDouble(),
+                            o.value(QStringLiteral("height")).toDouble());
+            t.text = o.value(QStringLiteral("text")).toString();
+            t.font = enumFromString(o.value(QStringLiteral("font")).toString(), kFonts);
+            t.size = static_cast<float>(o.value(QStringLiteral("size")).toDouble(16.0));
+            t.bold = o.value(QStringLiteral("bold")).toBool();
+            t.italic = o.value(QStringLiteral("italic")).toBool();
+            t.color = colorFromString(o.value(QStringLiteral("color")).toString());
+            if (t.id.isNull())
+                return std::unexpected(corrupt(QStringLiteral("bad text box")));
+            page.objects.emplace_back(std::move(t));
+            continue;
+        }
         // Unknown object types (from a newer version) would be lost on save:
         // the manifest's format_version check prevents loading such notes.
-        if (o.value(QStringLiteral("type")).toString() != QLatin1String("stroke"))
+        if (type != QLatin1String("stroke"))
             continue;
         core::Stroke s;
         s.id = { uuidFrom(o.value(QStringLiteral("id")).toString()) };

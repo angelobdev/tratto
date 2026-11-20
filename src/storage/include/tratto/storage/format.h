@@ -19,7 +19,8 @@
 // and a round-trip test (tests/storage).
 namespace tratto::storage {
 
-inline constexpr int kFormatVersion = 1;
+// 1: strokes. 2: text boxes.
+inline constexpr int kFormatVersion = 2;
 
 enum class ErrorCode { Io, Corrupt, NewerVersion, NotFound };
 

@@ -17,6 +17,7 @@
 #include <QtQml/qqmlregistration.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 class QSGImageNode;
@@ -53,6 +54,13 @@ class CanvasItem : public QQuickItem
     // True while the selection is being drawn, moved or resized (hide the menu).
     Q_PROPERTY(bool selectionBusy READ selectionBusy NOTIFY selectionChanged FINAL)
 
+    // Text editing: the QML editor sits at textEditRect (item px; height grows with
+    // the text) and starts with textEditInitial. textScale = item px per pt.
+    Q_PROPERTY(bool editingText READ editingText NOTIFY textEditChanged FINAL)
+    Q_PROPERTY(QRectF textEditRect READ textEditRect NOTIFY textEditChanged FINAL)
+    Q_PROPERTY(QString textEditInitial READ textEditInitial NOTIFY textEditChanged FINAL)
+    Q_PROPERTY(qreal textScale READ scale NOTIFY viewChanged FINAL)
+
 public:
     explicit CanvasItem(QQuickItem *parent = nullptr);
     ~CanvasItem() override;
@@ -86,6 +94,12 @@ public:
     // Pastes objects copied in Tratto (from any note) and selects them.
     Q_INVOKABLE void paste();
 
+    bool editingText() const { return m_editing.has_value(); }
+    QRectF textEditRect() const;
+    QString textEditInitial() const { return m_editing ? m_editing->text : QString(); }
+    // Ends text editing: adds, updates or (when empty) removes the text box.
+    Q_INVOKABLE void commitText(const QString &text);
+
 signals:
     void sessionChanged();
     void toolsChanged();
@@ -94,6 +108,10 @@ signals:
     void frameColorChanged();
     void overlaysChanged();
     void selectionChanged();
+    void textEditChanged(); // editing state or editor geometry
+    void textEditStarted(); // a box was opened: load textEditInitial into the editor
+    // The QML editor must commit now (the canvas was tapped while editing).
+    void textCommitRequested();
 
 protected:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *data) override;
@@ -156,14 +174,18 @@ private:
     void addAndSelect(std::vector<tratto::core::Object> objects);
     bool overOverlay(QPointF scenePos) const;
     void buildSelectionNodes(QSGNode *parent) const;
-    void refreshSnapshot(); // page from the session, minus lifted objects
+    void refreshSnapshot(); // page from the session, minus lifted / edited objects
+
+    // Text (canvastext.cpp)
+    void beginText(QPointF itemPos);
+    void endTextEditing();
     // The eraser ring follows the pointer while erasing is what a press would do.
     void showCursor(QPointF itemPos, bool forceEraser);
     void hideCursor();
     bool stylusRecentlyActive() const;
 
     // View
-    double scale() const;
+    double scale() const; // item px per pt
     QPointF toPage(QPointF itemPos) const;
     QSizeF pageSize() const;
     void setView(double zoom, QPointF offset);
@@ -219,6 +241,11 @@ private:
     std::vector<QPointF> m_lassoPoints;
     bool m_lifted = false;
     std::vector<std::pair<QColor, std::vector<QPointF>>> m_liftedTriangles; // pt, untransformed
+    std::vector<std::pair<QImage, QRectF>> m_liftedImages; // text boxes: image, bbox in pt
+
+    // The text box being edited (its original stays out of the tiles meanwhile).
+    std::optional<tratto::core::TextBox> m_editing;
+    bool m_editingIsNew = false;
     tratto::core::Affine m_dragTransform;
     QPointF m_dragStart; // pt
     QPointF m_resizeAnchor; // pt, the corner opposite the dragged handle

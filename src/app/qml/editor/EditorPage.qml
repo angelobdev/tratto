@@ -16,6 +16,7 @@ Page {
 
     // Saves what is pending before leaving; the session also saves on destruction.
     function leave() {
+        textEditor.commit()
         session.flush()
         page.back()
     }
@@ -96,7 +97,15 @@ Page {
                 frameColor: Theme.border
                 accentColor: Theme.accentInk
                 // The stylus goes to these, not to the canvas underneath.
-                overlays: [zoomControl, selectionMenu]
+                overlays: [zoomControl, selectionMenu, textEditor]
+            }
+
+            TextBoxEditor {
+                id: textEditor
+
+                objectName: "textEditor"
+                canvas: canvas
+                tools: tools
             }
 
             SelectionMenu {

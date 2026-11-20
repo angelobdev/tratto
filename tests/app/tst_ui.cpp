@@ -112,6 +112,7 @@ private slots:
     void initTestCase()
     {
         QQuickStyle::setStyle(QStringLiteral("Basic"));
+        AppServices::loadUiFont(); // as main() does
         m_touch = QTest::createTouchDevice();
     }
 
@@ -212,6 +213,15 @@ private slots:
         return QTest::qWaitFor([&] { return canvas->session()->loaded(); }) ? canvas : nullptr;
     }
 
+    // Types `text` key by key (QTest::keyClicks only exists for widgets).
+    void typeText(const QString &text)
+    {
+        for (const QChar c : text) {
+            const Qt::KeyboardModifiers mods = c.isUpper() ? Qt::ShiftModifier : Qt::NoModifier;
+            QTest::keyClick(m_window, c.toLatin1(), mods);
+        }
+    }
+
     // Mouse drag on the canvas, in canvas coordinates.
     void dragOn(CanvasItem *canvas, QPointF from, QPointF to)
     {
@@ -288,6 +298,60 @@ private slots:
         QCOMPARE(canvas->session()->page(0)->objects.size(), 0u);
         QTest::keyClick(m_window, Qt::Key_Z, Qt::ControlModifier | Qt::ShiftModifier);
         QCOMPARE(canvas->session()->page(0)->objects.size(), 1u);
+    }
+
+    void typeTextEditItAndRemoveIt()
+    {
+        CanvasItem *canvas = openEditor();
+        QVERIFY(canvas);
+        EditorTools *tools = canvas->tools();
+        const auto texts = [&] {
+            std::vector<tratto::core::TextBox> out;
+            for (const auto &o : canvas->session()->page(0)->objects) {
+                if (const auto *t = std::get_if<tratto::core::TextBox>(&o))
+                    out.push_back(*t);
+            }
+            return out;
+        };
+        const QPointF origin = canvas->mapToScene(QPointF(0, 0));
+
+        tools->setTool(EditorTools::Tool::Text);
+        QTest::mouseClick(m_window, Qt::LeftButton, { }, (origin + QPointF(250, 250)).toPoint());
+        QVERIFY(canvas->editingText());
+        // Letters that are also tool shortcuts (P, H, E, T, S, I) must be typed, not switch tools.
+        typeText(QStringLiteral("Physics test"));
+        QCOMPARE(tools->tool(), EditorTools::Tool::Text);
+        dump("text-editing");
+        QTest::keyClick(m_window, Qt::Key_Escape);
+        QVERIFY(!canvas->editingText());
+        dump("text-committed");
+        QCOMPARE(texts().size(), 1u);
+        QCOMPARE(texts()[0].text, QStringLiteral("Physics test"));
+        QVERIFY(texts()[0].bbox.height() > 10);
+
+        // Tap it again (the box's first line is at the first tap): same box, edited in
+        // place, with a toolbar style change.
+        QTest::mouseClick(m_window, Qt::LeftButton, { }, (origin + QPointF(250, 250)).toPoint());
+        QVERIFY(canvas->editingText());
+        QCOMPARE(canvas->textEditInitial(), QStringLiteral("Physics test"));
+        QTest::keyClick(m_window, Qt::Key_End);
+        typeText(QStringLiteral(" 2"));
+        tools->setTextStyle(EditorTools::TextFont::Serif, 20, true, false, 1);
+        QTest::keyClick(m_window, Qt::Key_Escape);
+        QCOMPARE(texts().size(), 1u);
+        QCOMPARE(texts()[0].text, QStringLiteral("Physics test 2"));
+        QVERIFY(texts()[0].bold);
+        QCOMPARE(texts()[0].font, tratto::core::TextFont::Serif);
+        QCOMPARE(texts()[0].size, 20.0F);
+
+        // Emptying a box removes it; undo brings it back.
+        QTest::mouseClick(m_window, Qt::LeftButton, { }, (origin + QPointF(250, 250)).toPoint());
+        QTest::keyClick(m_window, Qt::Key_A, Qt::ControlModifier);
+        QTest::keyClick(m_window, Qt::Key_Backspace);
+        QTest::keyClick(m_window, Qt::Key_Escape);
+        QCOMPARE(texts().size(), 0u);
+        canvas->session()->undo();
+        QCOMPARE(texts().size(), 1u);
     }
 
     void selectionMenuDeletesTheSelection()

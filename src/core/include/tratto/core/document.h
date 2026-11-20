@@ -42,8 +42,24 @@ struct Stroke
     void updateBounds();
 };
 
-// Text boxes and images join in M3.
-using Object = std::variant<Stroke>;
+enum class TextFont { Sans, Serif, Monospace };
+
+// Keyboard text. `bbox` is the box (pt): its width wraps the text, its height is
+// measured by the renderer when the text is committed (render::textHeight).
+struct TextBox
+{
+    ObjectId id;
+    QRectF bbox;
+    QString text;
+    TextFont font = TextFont::Sans;
+    float size = 16.0F; // pt
+    bool bold = false;
+    bool italic = false;
+    Rgba color = kInk;
+};
+
+// Images join later in M3.
+using Object = std::variant<Stroke, TextBox>;
 
 [[nodiscard]] ObjectId objectId(const Object &object);
 [[nodiscard]] QRectF objectBounds(const Object &object);

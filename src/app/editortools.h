@@ -62,6 +62,13 @@ public:
     EraserMode eraserMode() const { return m_eraserMode; }
     bool eraseHighlighterOnly() const { return m_eraseHighlighterOnly; }
     SelectionMode selectionMode() const { return m_selectionMode; }
+    TextFont textFont() const { return m_textFont; }
+    int textSize() const { return m_textSize; }
+    bool textBold() const { return m_textBold; }
+    bool textItalic() const { return m_textItalic; }
+    int textColorIndex() const { return m_textColor; }
+    // Shows a text box's style in the toolbar (when it is opened for editing).
+    void setTextStyle(TextFont font, int size, bool bold, bool italic, int colorIndex);
 
     // Values for the canvas, in pt.
     float penWidthPt() const;

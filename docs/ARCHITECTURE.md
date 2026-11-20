@@ -172,9 +172,12 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
 - **Clipboard:** `application/x-tratto-objects` (a page in the storage format, so it works across notes) plus a PNG of the selection for other apps. Pasted objects get new ids, land 16 pt lower-right and become the selection.
 - **Overlays:** the canvas filters stylus events at the window level, so items drawn over it (selection menu, zoom pill) are listed in `CanvasItem.overlays`; there the stylus reaches them instead of the canvas.
 - **Text:**
-  - a tap creates a `TextBox`;
-  - while editing, a QML `TextEdit` is overlaid on the canvas; when it loses focus the edit becomes a command;
-  - rendered with `QPainter` / `QTextLayout`.
+  - `core::TextBox`: box (pt), text, font (Sans = Inter / Serif / Monospace), size in pt, bold, italic, color. The width wraps the text; the height is measured by `render::textHeight` when the text is committed;
+  - with the text tool, a tap on empty paper opens a new box (first line centered on the tap, 400 pt wide or up to the right margin); a tap on a box opens it; a tap elsewhere while editing only ends the edit;
+  - editing happens in a QML `TextEdit` over the box (`TextBoxEditor.qml`), styled from the toolbar; while a box is edited its original is left out of the tiles. Opening a box loads its style into the toolbar;
+  - the edit ends on focus loss, Esc, a tap elsewhere or leaving the editor, and becomes `AddObjects` (new), `ReplaceObjects` (changed, same id) or `RemoveObjects` (emptied);
+  - rendering: laid out with `QTextLayout` at a 100 px font and scaled to the size in pt, so it looks the same at any zoom, in thumbnails and in export. Painted above the ink;
+  - selection: a text box is in a lasso when its center is; moved and scaled like strokes (scaling changes the font size); while dragging it is shown as an image.
 - **Images:**
   - from file, clipboard or drag and drop; copied into `assets/`;
   - move, resize, rotate by 90°; cropping comes later.
@@ -240,7 +243,7 @@ notes/<note-id>/
 - **Bundles are the source of truth.**
   - The library list is built by reading the manifests; a note whose manifest can't be read is skipped and logged, never deleted.
   - Save order: dirty pages, then the manifest, then page files the manifest no longer lists. A crash at any point leaves a loadable note.
-  - `format_version` covers the manifest and the page files. A note with a newer version is not opened (it would lose data on save).
+  - `format_version` covers the manifest and the page files. A note with a newer version is not opened (it would lose data on save). Versions: 1 strokes; 2 text boxes (no data migration needed: version 1 pages have none).
 - **Autosave:**
   - every command marks the page it touches as dirty;
   - a save happens 500 ms after the last change, at most every 5 s during continuous writing;

@@ -4,6 +4,7 @@
 #include "tratto/core/stroke_geometry.h"
 #include "tratto/core/tools.h"
 #include "tratto/render/paper_painter.h"
+#include "tratto/render/text_painter.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -58,6 +59,12 @@ void paintPage(QPainter &painter, const core::Page &page, const QRectF &clip)
             if (stroke && stroke->tool == layer && visible(object))
                 paintStroke(painter, *stroke);
         }
+    }
+    // Text above the ink (ARCHITECTURE §6).
+    for (const core::Object &object : page.objects) {
+        const auto *text = std::get_if<core::TextBox>(&object);
+        if (text && visible(object))
+            paintTextBox(painter, *text);
     }
     painter.restore();
 }

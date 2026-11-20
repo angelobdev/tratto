@@ -29,7 +29,8 @@ struct Affine
 // Non-zero winding test.
 [[nodiscard]] bool pointInPolygon(const std::vector<QPointF> &polygon, QPointF p);
 
-// Strokes with more than `threshold` of their points inside the lasso polygon.
+// Strokes with more than `threshold` of their points inside the lasso polygon, and
+// text boxes whose center is inside.
 [[nodiscard]] std::vector<ObjectId>
 selectByLasso(const Page &page, const std::vector<QPointF> &polygon, double threshold = 0.5);
 // Objects whose bounds intersect the rectangle.

@@ -62,6 +62,11 @@ std::vector<ObjectId> selectByLasso(const Page &page, const std::vector<QPointF>
     for (const QPointF &p : polygon)
         lassoBounds |= QRectF(p, QSizeF(0.001, 0.001));
     for (const Object &object : page.objects) {
+        if (const auto *text = std::get_if<TextBox>(&object)) {
+            if (pointInPolygon(polygon, text->bbox.center()))
+                ids.push_back(text->id);
+            continue;
+        }
         const auto *stroke = std::get_if<Stroke>(&object);
         if (!stroke || stroke->points.empty() || !stroke->bbox.intersects(lassoBounds))
             continue;
@@ -97,19 +102,21 @@ QRectF selectionBounds(const Page &page, const std::vector<ObjectId> &ids)
 
 Object transformed(const Object &object, const Affine &t)
 {
-    return std::visit(
-        [&](const auto &o) -> Object {
-            auto copy = o;
-            for (StrokePoint &p : copy.points) {
-                const QPointF q = t.map({ p.x, p.y });
-                p.x = static_cast<float>(q.x());
-                p.y = static_cast<float>(q.y());
-            }
-            copy.width = static_cast<float>(copy.width * t.lengthScale());
-            copy.updateBounds();
-            return copy;
-        },
-        object);
+    if (const auto *stroke = std::get_if<Stroke>(&object)) {
+        Stroke copy = *stroke;
+        for (StrokePoint &p : copy.points) {
+            const QPointF q = t.map({ p.x, p.y });
+            p.x = static_cast<float>(q.x());
+            p.y = static_cast<float>(q.y());
+        }
+        copy.width = static_cast<float>(copy.width * t.lengthScale());
+        copy.updateBounds();
+        return copy;
+    }
+    TextBox copy = std::get<TextBox>(object);
+    copy.bbox = t.mapRect(copy.bbox);
+    copy.size = static_cast<float>(copy.size * t.lengthScale());
+    return copy;
 }
 
 Object recolored(const Object &object, Rgba color)

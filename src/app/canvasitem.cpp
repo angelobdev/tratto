@@ -188,6 +188,8 @@ void CanvasItem::setView(double zoom, QPointF offset)
     m_pendingDirty = m_liveDirty = m_selectionDirty = true; // their geometry is in item px
     if (!m_selection.empty())
         emit selectionChanged(); // the menu follows the selection
+    if (m_editing)
+        emit textEditChanged(); // so does the text editor
     updateTiles();
     update();
     emit viewChanged();
@@ -419,7 +421,12 @@ void CanvasItem::resetPage()
     m_lassoPoints.clear();
     m_lifted = false;
     m_liftedTriangles.clear();
+    m_liftedImages.clear();
     m_selectionDirty = true;
+    if (m_editing) {
+        m_editing.reset();
+        emit textEditChanged();
+    }
     m_previousLevel = -1;
     ++m_generation;
 
@@ -560,8 +567,12 @@ void CanvasItem::beginInput(QPointF itemPos, float pressure, Source source, bool
         beginSelectionGesture(itemPos);
         return;
     }
+    if (tool == EditorTools::Tool::Text) {
+        beginText(itemPos);
+        return;
+    }
     if (tool != EditorTools::Tool::Pen && tool != EditorTools::Tool::Highlighter)
-        return; // text and image tools arrive later in M3
+        return; // the image tool arrives later in M3
 
     m_gesture = Gesture::Drawing;
     m_liveIsHighlighter = tool == EditorTools::Tool::Highlighter;
@@ -678,6 +689,7 @@ void CanvasItem::cancelInput()
         if (m_lifted) {
             m_lifted = false;
             m_liftedTriangles.clear();
+            m_liftedImages.clear();
             ++m_generation;
             refreshSnapshot();
             invalidate(m_selectionBounds);

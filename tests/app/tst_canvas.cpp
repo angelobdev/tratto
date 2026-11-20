@@ -249,6 +249,27 @@ private slots:
         QVERIFY(m_canvas->hasSelection());
     }
 
+    void textBoxIsSelectedAndMoved()
+    {
+        m_tools->setTool(EditorTools::Tool::Text);
+        QTest::mouseClick(m_window.get(), Qt::LeftButton, { }, QPoint(300, 300));
+        QVERIFY(m_canvas->editingText());
+        m_canvas->commitText(QStringLiteral("Hello"));
+        QVERIFY(!m_canvas->editingText());
+        const auto box0 = std::get<tratto::core::TextBox>(m_session->page(0)->objects[0]);
+
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 270), QPoint(800, 340)));
+        QVERIFY(m_canvas->hasSelection());
+        drag({ 320, 300 }, { 420, 300 });
+        const auto box1 = std::get<tratto::core::TextBox>(m_session->page(0)->objects[0]);
+        QCOMPARE(box1.id, box0.id);
+        QVERIFY(box1.bbox.left() > box0.bbox.left() + 50);
+        QCOMPARE(box1.text, QStringLiteral("Hello"));
+        m_session->undo();
+        QCOMPARE(std::get<tratto::core::TextBox>(m_session->page(0)->objects[0]).bbox, box0.bbox);
+    }
+
     void switchingToolClearsSelection()
     {
         drag({ 300, 300 }, { 400, 300 });

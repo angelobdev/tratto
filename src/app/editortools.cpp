@@ -40,6 +40,17 @@ void EditorTools::setTool(Tool tool)
     emit changed();
 }
 
+void EditorTools::setTextStyle(TextFont font, int size, bool bold, bool italic, int colorIndex)
+{
+    m_textFont = font;
+    m_textSize = size;
+    m_textBold = bold;
+    m_textItalic = italic;
+    if (colorIndex >= 0)
+        m_textColor = colorIndex;
+    emit changed();
+}
+
 QList<QColor> EditorTools::penColors() const
 {
     return toColors(core::kPenColors);

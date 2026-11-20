@@ -5,6 +5,8 @@ add_library(tratto_render STATIC
     paper_painter.cpp
     include/tratto/render/page_painter.h
     page_painter.cpp
+    include/tratto/render/text_painter.h
+    text_painter.cpp
 )
 target_include_directories(tratto_render PUBLIC include)
 target_link_libraries(tratto_render PUBLIC tratto_core Qt6::Gui)
