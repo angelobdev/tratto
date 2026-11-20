@@ -107,6 +107,42 @@ private slots:
         QCOMPARE(strokeCount(*m_session), 2);
     }
 
+    void partialEraserCutsStrokesInTwo()
+    {
+        drag({ 250, 300 }, { 650, 300 });
+        QCOMPARE(strokeCount(*m_session), 1);
+
+        m_tools->setTool(EditorTools::Tool::Eraser);
+        m_tools->setProperty("eraserMode", QVariant::fromValue(EditorTools::EraserMode::Partial));
+        drag({ 450, 250 }, { 450, 350 }); // across the middle
+        QCOMPARE(strokeCount(*m_session), 2);
+        // The page is centered: 680 px wide in a 900 px canvas, so it starts at x = 110.
+        const double eraserX = (450 - 110) * 595.28 / 680; // in pt
+        const double radius = m_tools->eraserRadiusPt();
+        for (const auto &object : m_session->page(0)->objects) {
+            for (const auto &p : std::get<tratto::core::Stroke>(object).points)
+                QVERIFY2(std::abs(p.x - eraserX) >= radius * 0.9, qPrintable(QString::number(p.x)));
+        }
+
+        m_session->undo(); // one step: the stroke is whole again
+        QCOMPARE(strokeCount(*m_session), 1);
+    }
+
+    void highlighterOnlyKeepsInk()
+    {
+        drag({ 250, 300 }, { 650, 300 });
+        m_tools->setTool(EditorTools::Tool::Highlighter);
+        drag({ 250, 400 }, { 650, 400 });
+        QCOMPARE(strokeCount(*m_session), 2);
+
+        m_tools->setTool(EditorTools::Tool::Eraser);
+        m_tools->setProperty("eraseHighlighterOnly", true);
+        drag({ 450, 250 }, { 450, 450 });
+        QCOMPARE(strokeCount(*m_session), 1);
+        QCOMPARE(std::get<tratto::core::Stroke>(m_session->page(0)->objects[0]).tool,
+                 tratto::core::StrokeTool::Pen);
+    }
+
     void nonDrawingToolsDoNothing()
     {
         m_tools->setTool(EditorTools::Tool::Select);

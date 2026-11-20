@@ -190,6 +190,60 @@ bool touchesCircle(const Stroke &stroke, QPointF center, double radius)
     return false;
 }
 
+std::vector<Stroke> eraseCircle(const Stroke &stroke, QPointF center, double radius)
+{
+    if (stroke.points.empty())
+        return { };
+    // Cheap reject: the bbox contains the whole centerline.
+    if (!stroke.bbox.intersects(
+            QRectF(center.x() - radius, center.y() - radius, 2 * radius, 2 * radius)))
+        return { stroke };
+
+    const auto inside
+        = [&](const StrokePoint &p) { return QLineF(center, pos(p)).length() < radius; };
+
+    // Densify so that cuts land close to the circle's edge.
+    const double step = std::max(0.25, radius / 6.0);
+    std::vector<StrokePoint> dense;
+    dense.push_back(stroke.points.front());
+    for (std::size_t i = 1; i < stroke.points.size(); ++i) {
+        const StrokePoint &a = stroke.points[i - 1];
+        const StrokePoint &b = stroke.points[i];
+        const double len = QLineF(pos(a), pos(b)).length();
+        const int pieces = std::max(1, static_cast<int>(std::ceil(len / step)));
+        for (int k = 1; k <= pieces; ++k) {
+            const float t = static_cast<float>(k) / static_cast<float>(pieces);
+            dense.push_back({ a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t,
+                              a.pressure + (b.pressure - a.pressure) * t });
+        }
+    }
+
+    if (std::ranges::none_of(dense, inside))
+        return { stroke };
+
+    std::vector<Stroke> out;
+    std::vector<StrokePoint> run;
+    const auto flush = [&] {
+        // Drop crumbs: single points left at the edge of the eraser.
+        if (run.size() >= 2) {
+            Stroke piece = stroke;
+            piece.id = ObjectId::create();
+            piece.points = simplify(run, kSimplifyTolerance);
+            piece.updateBounds();
+            out.push_back(std::move(piece));
+        }
+        run.clear();
+    };
+    for (const StrokePoint &p : dense) {
+        if (inside(p))
+            flush();
+        else
+            run.push_back(p);
+    }
+    flush();
+    return out;
+}
+
 std::vector<StrokePoint> finishPoints(const std::vector<StrokePoint> &raw)
 {
     return simplify(smooth(raw), kSimplifyTolerance);

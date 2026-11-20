@@ -156,10 +156,12 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
   - constant width, color with alpha ≈ 0.45;
   - drawn on a layer **below** the ink;
   - "straight line" option: the stroke becomes a segment.
-- **Eraser, whole stroke:** hit-test the stroke segments against the eraser circle (10 screen px) → `RemoveObjects`. One drag is one undo step (`UndoStack::beginGroup/endGroup`). Available since M1; the spatial grid comes when profiling asks for it. Until partial erasing lands (M3), "Partial" erases whole strokes with the chosen size.
+- **Eraser, whole stroke:** hit-test the stroke segments against the eraser circle (10 screen px) → `RemoveObjects`. One drag is one undo step (`UndoStack::beginGroup/endGroup`). Available since M1; the spatial grid comes when profiling asks for it.
 - **Eraser, partial:**
-  - strokes are split at the edge of the circle → `ReplaceObjects`;
-  - "highlighter only" option.
+  - the stroke is densified, points whose centerline falls inside the circle (5 / 8 / 12 pt) are dropped, and each remaining run becomes a new stroke with the same style (`core::eraseCircle`);
+  - `ReplaceObjects` puts the pieces where the original was in the drawing order; one drag is one undo step;
+  - "highlighter only" option (both modes).
+- **Eraser cursor:** a ring of the eraser's size follows the stylus while hovering (also with the eraser tip or the barrel button held) and the mouse.
 - **Lasso selection:** a polygon; a stroke is selected when most of its points fall inside (configurable threshold).
 - **Rectangle selection:** intersection with the bbox.
 - **Selection actions:**

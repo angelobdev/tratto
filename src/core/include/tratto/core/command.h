@@ -58,6 +58,28 @@ private:
     QRectF m_bounds;
 };
 
+// Replaces objects with others in the same drawing position (partial eraser:
+// a stroke becomes its remaining pieces). An empty replacement removes the object.
+class ReplaceObjects final : public Command
+{
+public:
+    struct Replacement
+    {
+        ObjectId original;
+        std::vector<Object> pieces;
+    };
+
+    ReplaceObjects(PageId page, std::vector<Replacement> replacements);
+    Change apply(Document &doc) override;
+    Change revert(Document &doc) override;
+
+private:
+    PageId m_page;
+    std::vector<Replacement> m_replacements;
+    std::vector<std::pair<std::size_t, Object>> m_originals; // index, object; filled by apply
+    QRectF m_bounds;
+};
+
 // Inserts a page at `index` (clamped to the end).
 class AddPage final : public Command
 {

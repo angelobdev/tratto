@@ -159,6 +159,31 @@ private slots:
         QVERIFY(!stack.canUndo());
     }
 
+    void replaceKeepsDrawingOrderAndUndoes()
+    {
+        Document doc = makeDocument();
+        const PageId page = doc.pages[0].id;
+        UndoStack stack;
+        std::vector<Object> strokes;
+        for (int i = 0; i < 4; ++i)
+            strokes.emplace_back(makeStroke(static_cast<float>(i * 20)));
+        stack.push(doc, std::make_unique<AddObjects>(page, strokes));
+        const auto before = idsOn(doc.pages[0]); // A B C D
+
+        const Stroke b1 = makeStroke(100), b2 = makeStroke(110);
+        std::vector<ReplaceObjects::Replacement> r;
+        r.push_back({ before[1], { b1, b2 } }); // B → B1 B2
+        r.push_back({ before[2], { } }); // C erased
+        r.push_back({ before[0], { } }); // A erased
+        stack.push(doc, std::make_unique<ReplaceObjects>(page, std::move(r)));
+        QCOMPARE(idsOn(doc.pages[0]), (std::vector { b1.id, b2.id, before[3] }));
+
+        stack.undo(doc);
+        QCOMPARE(idsOn(doc.pages[0]), before);
+        stack.redo(doc);
+        QCOMPARE(idsOn(doc.pages[0]), (std::vector { b1.id, b2.id, before[3] }));
+    }
+
     void addPageAndUndo()
     {
         Document doc = makeDocument();

@@ -77,6 +77,8 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void hoverMoveEvent(QHoverEvent *event) override;
+    void hoverLeaveEvent(QHoverEvent *event) override;
     void touchEvent(QTouchEvent *event) override;
 
 private:
@@ -113,6 +115,10 @@ private:
     void endInput();
     void cancelInput();
     void eraseAt(QPointF itemPos);
+    double eraserRadius() const; // pt
+    // The eraser ring follows the pointer while erasing is what a press would do.
+    void showCursor(QPointF itemPos, bool forceEraser);
+    void hideCursor();
     bool stylusRecentlyActive() const;
 
     // View
@@ -165,6 +171,11 @@ private:
     QColor m_liveColor;
     bool m_liveDirty = false;
     bool m_liveIsHighlighter = false;
+
+    // Eraser cursor (item px)
+    QPointF m_cursorPos;
+    double m_cursorRadius = 0.0; // px; 0 = hidden
+    bool m_cursorDirty = false;
 
     // Gestures
     Gesture m_gesture = Gesture::None;

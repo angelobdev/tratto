@@ -152,6 +152,46 @@ private slots:
         QVERIFY(!touchesCircle(s, { 40, 0 }, 2.0)); // rejected by the bounding box
     }
 
+    void partialEraserSplitsTheStroke()
+    {
+        Stroke s;
+        s.id = ObjectId::create();
+        s.points = line(101); // x 0..100 on y = 0
+        s.updateBounds();
+
+        const auto pieces = eraseCircle(s, { 50, 0 }, 5);
+        QCOMPARE(pieces.size(), 2u);
+        QVERIFY(pieces[0].id != s.id && pieces[1].id != s.id);
+        QCOMPARE(pieces[0].points.front().x, 0.0F);
+        QVERIFY(std::abs(pieces[0].points.back().x - 45.0F) < 1.0F); // cut at the edge
+        QVERIFY(std::abs(pieces[1].points.front().x - 55.0F) < 1.0F);
+        QCOMPARE(pieces[1].points.back().x, 100.0F);
+        QCOMPARE(pieces[0].color, s.color);
+        QVERIFY(pieces[1].bbox.left() > 50);
+    }
+
+    void partialEraserAtTheEndShortensTheStroke()
+    {
+        Stroke s;
+        s.points = line(101);
+        s.updateBounds();
+        const auto pieces = eraseCircle(s, { 100, 0 }, 10);
+        QCOMPARE(pieces.size(), 1u);
+        QVERIFY(pieces[0].points.back().x < 91.0F);
+    }
+
+    void partialEraserMissOrSwallow()
+    {
+        Stroke s;
+        s.id = ObjectId::create();
+        s.points = line(11);
+        s.updateBounds();
+        const auto untouched = eraseCircle(s, { 5, 30 }, 5);
+        QCOMPARE(untouched.size(), 1u);
+        QCOMPARE(untouched[0].id, s.id);
+        QVERIFY(eraseCircle(s, { 5, 0 }, 20).empty()); // whole stroke inside
+    }
+
     void ribbonMatchesPressure()
     {
         const StrokeRibbon r = ribbon(line(3, 1.0F), 2.0F, true);

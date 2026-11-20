@@ -125,6 +125,31 @@ QSGGeometryNode *makeTriangleNode(const std::vector<QPointF> &tris, const QColor
     return node;
 }
 
+// A ring (annulus) as a triangle strip, in item px.
+QSGGeometryNode *makeRingNode(QPointF center, double inner, double outer, const QColor &color)
+{
+    constexpr int segments = 48;
+    auto *geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 2 * (segments + 1));
+    geometry->setDrawingMode(QSGGeometry::DrawTriangleStrip);
+    QSGGeometry::Point2D *v = geometry->vertexDataAsPoint2D();
+    for (int i = 0; i <= segments; ++i) {
+        const double a = 2 * std::numbers::pi * i / segments;
+        const double c = std::cos(a), s = std::sin(a);
+        v[2 * i].set(static_cast<float>(center.x() + inner * c),
+                     static_cast<float>(center.y() + inner * s));
+        v[2 * i + 1].set(static_cast<float>(center.x() + outer * c),
+                         static_cast<float>(center.y() + outer * s));
+    }
+    auto *material = new QSGFlatColorMaterial;
+    material->setColor(color);
+    auto *node = new QSGGeometryNode;
+    node->setGeometry(geometry);
+    node->setFlag(QSGNode::OwnsGeometry);
+    node->setMaterial(material);
+    node->setFlag(QSGNode::OwnsMaterial);
+    return node;
+}
+
 void deleteChildren(QSGNode *parent)
 {
     while (QSGNode *child = parent->firstChild()) {
@@ -142,6 +167,7 @@ struct CanvasRoot : QSGNode
     QSGNode *tiles = new QSGNode;
     QSGNode *pending = new QSGNode;
     QSGNode *live = new QSGNode;
+    QSGNode *cursor = new QSGNode;
 
     CanvasRoot()
     {
@@ -151,6 +177,7 @@ struct CanvasRoot : QSGNode
         page->appendChildNode(tiles);
         page->appendChildNode(pending);
         page->appendChildNode(live);
+        appendChildNode(cursor);
     }
 };
 
@@ -162,6 +189,7 @@ CanvasItem::CanvasItem(QQuickItem *parent)
     setFlag(ItemHasContents);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::MiddleButton);
     setAcceptTouchEvents(true);
+    setAcceptHoverEvents(true);
     setClip(true);
     m_offset = { 0, kMarginTop };
     m_clock.start();
@@ -567,8 +595,14 @@ bool CanvasItem::handleTablet(QTabletEvent *event)
 {
     const QPointF pos = mapFromScene(event->scenePosition());
     const bool ours = m_gesture != Gesture::None && m_source == Source::Stylus;
-    if (!ours && (!isVisible() || !isEnabled() || !contains(pos)))
+    if (!ours && (!isVisible() || !isEnabled() || !contains(pos))) {
+        hideCursor();
         return false; // the stylus is over other UI: let Qt deliver it as a mouse
+    }
+    const Preferences *prefs = Preferences::instance();
+    const bool barrel = event->buttons() & (Qt::MiddleButton | Qt::RightButton);
+    const bool eraserTip = event->pointerType() == QPointingDevice::PointerType::Eraser
+        || (barrel && prefs && prefs->barrelButtonErases());
 
     m_lastStylusMs = m_clock.elapsed();
 
@@ -577,16 +611,14 @@ bool CanvasItem::handleTablet(QTabletEvent *event)
         // A stylus touching down ends any finger gesture (palm rejection).
         if (m_gesture != Gesture::None && m_source != Source::Stylus)
             cancelInput();
-        const Preferences *prefs = Preferences::instance();
-        const bool barrel = event->buttons() & (Qt::MiddleButton | Qt::RightButton);
-        const bool eraser = event->pointerType() == QPointingDevice::PointerType::Eraser
-            || (barrel && prefs && prefs->barrelButtonErases());
-        beginInput(pos, static_cast<float>(event->pressure()), Source::Stylus, eraser);
+        beginInput(pos, static_cast<float>(event->pressure()), Source::Stylus, eraserTip);
         break;
     }
     case QEvent::TabletMove:
         if (ours)
             continueInput(pos, static_cast<float>(event->pressure()));
+        else
+            showCursor(pos, eraserTip); // hovering
         break;
     case QEvent::TabletRelease:
         if (ours)
@@ -741,22 +773,74 @@ void CanvasItem::eraseAt(QPointF itemPos)
     if (!page)
         return;
     const QPointF center = toPage(itemPos);
-    const bool partialSize = m_tools->eraserMode() == EditorTools::EraserMode::Partial;
-    // Partial erasing (cutting strokes) arrives in M3; for now it erases whole strokes
-    // with the chosen size.
-    const double radius = partialSize ? m_tools->eraserRadiusPt() : kEraserRadiusPx / scale();
+    const bool partial = m_tools->eraserMode() == EditorTools::EraserMode::Partial;
+    const double radius = eraserRadius();
     const bool highlighterOnly = m_tools->eraseHighlighterOnly();
+    showCursor(itemPos, true);
 
     std::vector<core::ObjectId> hit;
+    std::vector<core::ReplaceObjects::Replacement> cut;
     for (const core::Object &object : page->objects) {
         const auto *stroke = std::get_if<core::Stroke>(&object);
         if (!stroke || (highlighterOnly && stroke->tool != core::StrokeTool::Highlighter))
             continue;
-        if (core::touchesCircle(*stroke, center, radius))
+        if (!core::touchesCircle(*stroke, center, radius))
+            continue;
+        if (!partial) {
             hit.push_back(stroke->id);
+            continue;
+        }
+        // Partial: the stroke becomes the pieces outside the circle.
+        auto pieces = core::eraseCircle(*stroke, center, radius);
+        if (pieces.size() == 1 && pieces[0].id == stroke->id)
+            continue; // the outline touched, the centerline didn't
+        std::vector<core::Object> objects(std::make_move_iterator(pieces.begin()),
+                                          std::make_move_iterator(pieces.end()));
+        cut.push_back({ stroke->id, std::move(objects) });
     }
     if (!hit.empty())
         m_session->push(std::make_unique<core::RemoveObjects>(page->id, std::move(hit)));
+    if (!cut.empty())
+        m_session->push(std::make_unique<core::ReplaceObjects>(page->id, std::move(cut)));
+}
+
+double CanvasItem::eraserRadius() const
+{
+    const bool partial = m_tools && m_tools->eraserMode() == EditorTools::EraserMode::Partial;
+    return partial ? m_tools->eraserRadiusPt() : kEraserRadiusPx / scale();
+}
+
+void CanvasItem::showCursor(QPointF itemPos, bool forceEraser)
+{
+    const bool erasing = forceEraser || m_gesture == Gesture::Erasing
+        || (m_tools && m_tools->tool() == EditorTools::Tool::Eraser);
+    const double radius = erasing && m_snapshot ? eraserRadius() * scale() : 0.0;
+    if (radius == m_cursorRadius && itemPos == m_cursorPos)
+        return;
+    m_cursorPos = itemPos;
+    m_cursorRadius = radius;
+    m_cursorDirty = true;
+    update();
+}
+
+void CanvasItem::hideCursor()
+{
+    if (m_cursorRadius == 0.0)
+        return;
+    m_cursorRadius = 0.0;
+    m_cursorDirty = true;
+    update();
+}
+
+void CanvasItem::hoverMoveEvent(QHoverEvent *event)
+{
+    if (!stylusRecentlyActive())
+        showCursor(event->position(), false);
+}
+
+void CanvasItem::hoverLeaveEvent(QHoverEvent *)
+{
+    hideCursor();
 }
 
 // ---------------------------------------------------------------------------
@@ -967,7 +1051,7 @@ QSGNode *CanvasItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             t.node = nullptr;
             t.upload = !t.image.isNull();
         }
-        m_pendingDirty = m_liveDirty = true;
+        m_pendingDirty = m_liveDirty = m_cursorDirty = true;
     }
 
     for (QSGNode *node : m_nodesToDelete) {
@@ -1027,6 +1111,18 @@ QSGNode *CanvasItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         for (const PendingStroke &p : m_pending)
             root->pending->appendChildNode(makeTriangleNode(p.triangles, p.color, m_offset, s));
         m_pendingDirty = false;
+    }
+
+    if (m_cursorDirty) {
+        deleteChildren(root->cursor);
+        if (m_cursorRadius > 0.0) {
+            // Dark ring with a light halo, visible on any paper.
+            root->cursor->appendChildNode(makeRingNode(
+                m_cursorPos, m_cursorRadius, m_cursorRadius + 3.0, QColor(255, 255, 255, 230)));
+            root->cursor->appendChildNode(makeRingNode(
+                m_cursorPos, m_cursorRadius, m_cursorRadius + 1.5, QColor(0x3F, 0x3F, 0x46)));
+        }
+        m_cursorDirty = false;
     }
 
     if (m_liveDirty) {

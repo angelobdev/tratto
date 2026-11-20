@@ -46,6 +46,11 @@ struct StrokeRibbon
 // True when a circle (eraser) touches the stroke's outline.
 [[nodiscard]] bool touchesCircle(const Stroke &stroke, QPointF center, double radius);
 
+// Partial eraser: the parts of `stroke` whose centerline stays outside the circle,
+// as new strokes (new ids, same style). Returns {stroke} unchanged when the circle
+// doesn't reach the centerline, and nothing when the whole stroke is inside.
+[[nodiscard]] std::vector<Stroke> eraseCircle(const Stroke &stroke, QPointF center, double radius);
+
 // Final processing on pen-up: smooth, then simplify with a low tolerance.
 [[nodiscard]] std::vector<StrokePoint> finishPoints(const std::vector<StrokePoint> &raw);
 

@@ -83,6 +83,70 @@ Change RemoveObjects::revert(Document &doc)
     return { m_page, m_bounds };
 }
 
+ReplaceObjects::ReplaceObjects(PageId page, std::vector<Replacement> replacements)
+    : m_page(page)
+    , m_replacements(std::move(replacements))
+{
+}
+
+Change ReplaceObjects::apply(Document &doc)
+{
+    m_originals.clear();
+    m_bounds = { };
+    Page *page = doc.page(m_page);
+    if (!page)
+        return { m_page, { } };
+    std::vector<Object> result;
+    result.reserve(page->objects.size());
+    for (std::size_t i = 0; i < page->objects.size(); ++i) {
+        Object &object = page->objects[i];
+        const auto r = std::ranges::find(m_replacements, objectId(object), &Replacement::original);
+        if (r == m_replacements.end()) {
+            result.push_back(std::move(object));
+            continue;
+        }
+        m_bounds |= objectBounds(object);
+        // Index in the new list, so revert can put it back in the same place.
+        m_originals.emplace_back(result.size(), std::move(object));
+        result.insert(result.end(), r->pieces.begin(), r->pieces.end());
+    }
+    page->objects = std::move(result);
+    doc.dirtyPages.insert(m_page);
+    return { m_page, m_bounds };
+}
+
+Change ReplaceObjects::revert(Document &doc)
+{
+    Page *page = doc.page(m_page);
+    if (!page)
+        return { m_page, m_bounds };
+    // Walk the list as apply() left it: each original goes back in front of the
+    // object now at its recorded position (its first piece), and pieces are dropped.
+    std::vector<ObjectId> pieceIds;
+    for (const Replacement &r : m_replacements) {
+        for (const Object &piece : r.pieces)
+            pieceIds.push_back(objectId(piece));
+    }
+    std::vector<Object> kept;
+    std::size_t originalIndex = 0;
+    std::size_t position = 0; // position in the post-apply list
+    for (Object &object : page->objects) {
+        while (originalIndex < m_originals.size() && m_originals[originalIndex].first == position) {
+            kept.push_back(std::move(m_originals[originalIndex].second));
+            ++originalIndex;
+        }
+        if (std::ranges::find(pieceIds, objectId(object)) == pieceIds.end())
+            kept.push_back(std::move(object));
+        ++position;
+    }
+    while (originalIndex < m_originals.size())
+        kept.push_back(std::move(m_originals[originalIndex++].second));
+    page->objects = std::move(kept);
+    m_originals.clear();
+    doc.dirtyPages.insert(m_page);
+    return { m_page, m_bounds };
+}
+
 AddPage::AddPage(Page page, std::size_t index)
     : m_page(std::move(page))
     , m_index(index)
