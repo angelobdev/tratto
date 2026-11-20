@@ -61,6 +61,7 @@ public:
     bool straightHighlighter() const { return m_straightHighlighter; }
     EraserMode eraserMode() const { return m_eraserMode; }
     bool eraseHighlighterOnly() const { return m_eraseHighlighterOnly; }
+    SelectionMode selectionMode() const { return m_selectionMode; }
 
     // Values for the canvas, in pt.
     float penWidthPt() const;

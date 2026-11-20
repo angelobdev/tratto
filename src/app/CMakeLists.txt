@@ -12,6 +12,7 @@ set_source_files_properties(
 qt_add_qml_module(tratto_ui
     URI Tratto
     VERSION 1.0
+    OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Tratto
     QML_FILES
         qml/Main.qml
         qml/Theme.qml
@@ -36,6 +37,7 @@ qt_add_qml_module(tratto_ui
         qml/editor/EditorPage.qml
         qml/editor/EditorTopBar.qml
         qml/editor/PagesPanel.qml
+        qml/editor/SelectionMenu.qml
         qml/editor/ToolRow.qml
         qml/editor/ZoomControl.qml
         qml/library/GroupCard.qml
@@ -66,6 +68,8 @@ qt_add_qml_module(tratto_ui
         notesession.h notesession.cpp
         library.h library.cpp
         canvasitem.h canvasitem.cpp
+        canvasselection.cpp
+        canvasgeometry.h
         appservices.h appservices.cpp
 )
 

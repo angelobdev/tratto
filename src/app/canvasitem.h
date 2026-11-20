@@ -4,6 +4,7 @@
 #include "editortools.h"
 #include "notesession.h"
 #include "tratto/core/document.h"
+#include "tratto/core/selection.h"
 
 #include <QColor>
 #include <QElapsedTimer>
@@ -41,6 +42,16 @@ class CanvasItem : public QQuickItem
     Q_PROPERTY(bool canZoomOut READ canZoomOut NOTIFY viewChanged FINAL)
     // Page outline and shadow color (from the theme).
     Q_PROPERTY(QColor frameColor MEMBER m_frameColor NOTIFY frameColorChanged FINAL)
+    // Selection outline, lasso and handles (Theme.accentInk).
+    Q_PROPERTY(QColor accentColor MEMBER m_accentColor NOTIFY frameColorChanged FINAL)
+    // Items drawn over the canvas (menus, zoom pill): the stylus goes to them, not the canvas.
+    Q_PROPERTY(QList<QQuickItem *> overlays MEMBER m_overlays NOTIFY overlaysChanged FINAL)
+
+    Q_PROPERTY(bool hasSelection READ hasSelection NOTIFY selectionChanged FINAL)
+    // Selection bounds in item px, for the actions menu.
+    Q_PROPERTY(QRectF selectionRect READ selectionRect NOTIFY selectionChanged FINAL)
+    // True while the selection is being drawn, moved or resized (hide the menu).
+    Q_PROPERTY(bool selectionBusy READ selectionBusy NOTIFY selectionChanged FINAL)
 
 public:
     explicit CanvasItem(QQuickItem *parent = nullptr);
@@ -60,12 +71,29 @@ public:
     Q_INVOKABLE void zoomIn();
     Q_INVOKABLE void zoomOut();
 
+    bool hasSelection() const { return !m_selection.empty(); }
+    QRectF selectionRect() const;
+    bool selectionBusy() const;
+
+    // Selection actions (menu and shortcuts).
+    Q_INVOKABLE void clearSelection();
+    Q_INVOKABLE void selectAll();
+    Q_INVOKABLE void deleteSelection();
+    Q_INVOKABLE void copySelection();
+    Q_INVOKABLE void cutSelection();
+    Q_INVOKABLE void duplicateSelection();
+    Q_INVOKABLE void recolorSelection(const QColor &color);
+    // Pastes objects copied in Tratto (from any note) and selects them.
+    Q_INVOKABLE void paste();
+
 signals:
     void sessionChanged();
     void toolsChanged();
     void pageIndexChanged();
     void viewChanged();
     void frameColorChanged();
+    void overlaysChanged();
+    void selectionChanged();
 
 protected:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *data) override;
@@ -83,7 +111,7 @@ protected:
 
 private:
     enum class Source { Stylus, Mouse, Touch };
-    enum class Gesture { None, Drawing, Erasing, Panning, Pinching };
+    enum class Gesture { None, Drawing, Erasing, Panning, Pinching, Selecting, Moving, Resizing };
 
     struct Tile
     {
@@ -116,6 +144,19 @@ private:
     void cancelInput();
     void eraseAt(QPointF itemPos);
     double eraserRadius() const; // pt
+
+    // Selection (canvasselection.cpp)
+    bool beginSelectionGesture(QPointF itemPos);
+    void continueSelectionGesture(QPointF itemPos);
+    void endSelectionGesture();
+    void setSelection(std::vector<tratto::core::ObjectId> ids);
+    void refreshSelection(); // after the page changed: drop missing ids, recompute bounds
+    void lift(); // hide the selection from the tiles while it moves
+    std::vector<tratto::core::Object> selectedObjects() const;
+    void addAndSelect(std::vector<tratto::core::Object> objects);
+    bool overOverlay(QPointF scenePos) const;
+    void buildSelectionNodes(QSGNode *parent) const;
+    void refreshSnapshot(); // page from the session, minus lifted objects
     // The eraser ring follows the pointer while erasing is what a press would do.
     void showCursor(QPointF itemPos, bool forceEraser);
     void hideCursor();
@@ -171,6 +212,19 @@ private:
     QColor m_liveColor;
     bool m_liveDirty = false;
     bool m_liveIsHighlighter = false;
+
+    // Selection, in page pt
+    std::vector<tratto::core::ObjectId> m_selection;
+    QRectF m_selectionBounds;
+    std::vector<QPointF> m_lassoPoints;
+    bool m_lifted = false;
+    std::vector<std::pair<QColor, std::vector<QPointF>>> m_liftedTriangles; // pt, untransformed
+    tratto::core::Affine m_dragTransform;
+    QPointF m_dragStart; // pt
+    QPointF m_resizeAnchor; // pt, the corner opposite the dragged handle
+    bool m_selectionDirty = false;
+    QColor m_accentColor = QColor(0x3B, 0x5B, 0xDB);
+    QList<QQuickItem *> m_overlays;
 
     // Eraser cursor (item px)
     QPointF m_cursorPos;

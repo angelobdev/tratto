@@ -33,6 +33,26 @@ private:
     CanvasItem *m_canvas = nullptr;
     QPointingDevice *m_touch = nullptr;
 
+    // Lasso (or rectangle) with the mouse along the edges of `r`.
+    void lasso(const QRect &r)
+    {
+        const QPoint corners[]
+            = { r.topLeft(), r.topRight(), r.bottomRight(), r.bottomLeft(), r.topLeft() };
+        QTest::mousePress(m_window.get(), Qt::LeftButton, { }, corners[0]);
+        for (int c = 1; c < 5; ++c) {
+            for (int i = 1; i <= 8; ++i)
+                QTest::mouseMove(m_window.get(),
+                                 corners[c - 1] + (corners[c] - corners[c - 1]) * i / 8);
+        }
+        QTest::mouseRelease(m_window.get(), Qt::LeftButton, { }, corners[4]);
+    }
+
+    const tratto::core::Stroke &strokeAt(int index) const
+    {
+        return std::get<tratto::core::Stroke>(
+            m_session->page(0)->objects[static_cast<std::size_t>(index)]);
+    }
+
     void drag(QPoint from, QPoint to)
     {
         QTest::mousePress(m_window.get(), Qt::LeftButton, { }, from);
@@ -143,9 +163,105 @@ private slots:
                  tratto::core::StrokeTool::Pen);
     }
 
+    void lassoSelectsEnclosedStrokes()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        drag({ 300, 500 }, { 400, 500 });
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 280), QPoint(420, 330)));
+        QVERIFY(m_canvas->hasSelection());
+        QVERIFY(m_canvas->selectionRect().contains(QPointF(350, 300)));
+        QVERIFY(!m_canvas->selectionRect().contains(QPointF(350, 500)));
+        QCOMPARE(strokeCount(*m_session), 2); // selecting draws nothing
+        QVERIFY(!m_session->canUndo() || strokeCount(*m_session) == 2);
+    }
+
+    void rectangleModeSelectsTouchedStrokes()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        m_tools->setTool(EditorTools::Tool::Select);
+        m_tools->setProperty("selectionMode",
+                             QVariant::fromValue(EditorTools::SelectionMode::Rectangle));
+        drag({ 380, 280 }, { 450, 320 }); // only the end of the stroke
+        QVERIFY(m_canvas->hasSelection());
+    }
+
+    void moveSelectionAndUndo()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        const float x0 = strokeAt(0).points.front().x;
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 280), QPoint(420, 320)));
+        drag({ 350, 300 }, { 450, 400 }); // drag inside the selection
+        QCOMPARE(strokeCount(*m_session), 1);
+        const float moved = strokeAt(0).points.front().x - x0;
+        QVERIFY2(std::abs(moved - 100 * 595.28F / 680) < 1.0F, qPrintable(QString::number(moved)));
+        QVERIFY(m_canvas->hasSelection()); // still selected after moving
+
+        m_session->undo();
+        QCOMPARE(strokeAt(0).points.front().x, x0);
+    }
+
+    void resizeFromAHandle()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        const double width0 = strokeAt(0).bbox.width();
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 280), QPoint(420, 320)));
+        const QRectF box = m_canvas->selectionRect();
+        // Drag the bottom-right handle so the box doubles in size.
+        drag(box.bottomRight().toPoint(),
+             (box.topLeft() + (box.bottomRight() - box.topLeft()) * 2).toPoint());
+        QVERIFY2(strokeAt(0).bbox.width() > width0 * 1.7,
+                 qPrintable(QString::number(strokeAt(0).bbox.width())));
+        QVERIFY(strokeAt(0).width > 2.5F); // width scales too
+    }
+
+    void deleteDuplicateRecolor()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 280), QPoint(420, 320)));
+
+        m_canvas->duplicateSelection();
+        QCOMPARE(strokeCount(*m_session), 2);
+        QVERIFY(strokeAt(1).id != strokeAt(0).id);
+        QVERIFY(strokeAt(1).bbox.top() > strokeAt(0).bbox.top()); // offset down-right
+
+        m_canvas->recolorSelection(QColor(0xE03131)); // the duplicate is selected
+        QCOMPARE(strokeAt(1).color, tratto::core::Rgba::fromRgb(0xE03131));
+        QVERIFY(strokeAt(0).color != tratto::core::Rgba::fromRgb(0xE03131));
+
+        m_canvas->deleteSelection();
+        QCOMPARE(strokeCount(*m_session), 1);
+        QVERIFY(!m_canvas->hasSelection());
+    }
+
+    void copyAndPaste()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 280), QPoint(420, 320)));
+        m_canvas->copySelection();
+        m_canvas->setPageIndex(1); // paste on another page
+        m_canvas->paste();
+        QCOMPARE(static_cast<int>(m_session->page(1)->objects.size()), 1);
+        QVERIFY(m_canvas->hasSelection());
+    }
+
+    void switchingToolClearsSelection()
+    {
+        drag({ 300, 300 }, { 400, 300 });
+        m_tools->setTool(EditorTools::Tool::Select);
+        lasso(QRect(QPoint(280, 280), QPoint(420, 320)));
+        QVERIFY(m_canvas->hasSelection());
+        m_tools->setTool(EditorTools::Tool::Pen);
+        QVERIFY(!m_canvas->hasSelection());
+    }
+
     void nonDrawingToolsDoNothing()
     {
-        m_tools->setTool(EditorTools::Tool::Select);
+        m_tools->setTool(EditorTools::Tool::Text);
         drag({ 300, 300 }, { 500, 350 });
         QCOMPARE(strokeCount(*m_session), 0);
     }

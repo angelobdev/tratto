@@ -194,62 +194,62 @@
 <context>
     <name>EditorTopBar</name>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="38"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="39"/>
         <source>Library</source>
         <translation>Libreria</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="39"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="40"/>
         <source>Back to the library</source>
         <translation>Torna alla libreria</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="63"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="64"/>
         <source>Untitled note</source>
         <translation>Nota senza titolo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="69"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="70"/>
         <source>Note title</source>
         <translation>Titolo della nota</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="133"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="134"/>
         <source>Saved automatically</source>
         <translation>Salvato automaticamente</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="133"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="134"/>
         <source>Saving…</source>
         <translation>Salvataggio…</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="147"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="148"/>
         <source>Undo (Ctrl+Z)</source>
         <translation>Annulla (Ctrl+Z)</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="158"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="159"/>
         <source>Redo (Ctrl+Shift+Z)</source>
         <translation>Ripeti (Ctrl+Maiusc+Z)</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="171"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="172"/>
         <source>Tablet mode</source>
         <translation>Modalità tablet</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="181"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="182"/>
         <source>Pages</source>
         <translation>Pagine</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="193"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="194"/>
         <source>Export</source>
         <translation>Esporta</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="205"/>
+        <location filename="../src/app/qml/editor/EditorTopBar.qml" line="206"/>
         <source>More options</source>
         <translation>Altre opzioni</translation>
     </message>
@@ -347,12 +347,12 @@
 <context>
     <name>GroupMenu</name>
     <message>
-        <location filename="../src/app/qml/library/GroupMenu.qml" line="14"/>
+        <location filename="../src/app/qml/library/GroupMenu.qml" line="15"/>
         <source>Rename…</source>
         <translation>Rinomina…</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/GroupMenu.qml" line="15"/>
+        <location filename="../src/app/qml/library/GroupMenu.qml" line="16"/>
         <source>Delete group…</source>
         <translation>Elimina gruppo…</translation>
     </message>
@@ -396,98 +396,98 @@
     </message>
     <message>
         <location filename="../src/app/qml/library/LibraryPage.qml" line="203"/>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="357"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="363"/>
         <source>Empty trash</source>
         <translation>Svuota cestino</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="236"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="242"/>
         <source>Notes in the trash are deleted for good after 30 days.</source>
         <translation>Le note nel cestino vengono eliminate definitivamente dopo 30 giorni.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="246"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="252"/>
         <source>The trash is empty.</source>
         <translation>Il cestino è vuoto.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="247"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="253"/>
         <source>No notes match “%1”.</source>
         <translation>Nessuna nota corrisponde a “%1”.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="248"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="254"/>
         <source>No notes yet. Start one with New note.</source>
         <translation>Ancora nessuna nota. Iniziane una con Nuova nota.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="249"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="255"/>
         <source>No notes here yet.</source>
         <translation>Ancora nessuna nota qui.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="303"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="309"/>
         <source>Rename note</source>
         <translation>Rinomina nota</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="304"/>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="313"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="310"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="319"/>
         <source>Rename</source>
         <translation>Rinomina</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="305"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="311"/>
         <source>Title</source>
         <translation>Titolo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="312"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="318"/>
         <source>Rename group</source>
         <translation>Rinomina gruppo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="314"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="320"/>
         <source>Group name</source>
         <translation>Nome del gruppo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="333"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="339"/>
         <source>Delete forever?</source>
         <translation>Eliminare definitivamente?</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="334"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="340"/>
         <source>“%1” will be deleted for good. This can&apos;t be undone.</source>
         <translation>“%1” verrà eliminata definitivamente. L&apos;operazione non si può annullare.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="335"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="341"/>
         <source>Delete</source>
         <translation>Elimina</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="342"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="348"/>
         <source>Delete group?</source>
         <translation>Eliminare il gruppo?</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="343"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="349"/>
         <source>The group “%1” will be deleted. Its notes become standalone notes.</source>
         <translation>Il gruppo “%1” verrà eliminato. Le sue note diventeranno note libere.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="344"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="350"/>
         <source>Delete group</source>
         <translation>Elimina gruppo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="355"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="361"/>
         <source>Empty the trash?</source>
         <translation>Svuotare il cestino?</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="356"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="362"/>
         <source>%1 will be deleted for good. This can&apos;t be undone.</source>
         <translation>%1 verranno eliminate definitivamente. L&apos;operazione non si può annullare.</translation>
     </message>
@@ -766,17 +766,17 @@
 <context>
     <name>NoteCard</name>
     <message>
-        <location filename="../src/app/qml/library/NoteCard.qml" line="119"/>
+        <location filename="../src/app/qml/library/NoteCard.qml" line="120"/>
         <source>Untitled note</source>
         <translation>Nota senza titolo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteCard.qml" line="142"/>
+        <location filename="../src/app/qml/library/NoteCard.qml" line="143"/>
         <source>Standalone note</source>
         <translation>Nota libera</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteCard.qml" line="143"/>
+        <location filename="../src/app/qml/library/NoteCard.qml" line="144"/>
         <source>Deleted %1</source>
         <translation>Eliminata %1</translation>
     </message>
@@ -784,37 +784,37 @@
 <context>
     <name>NoteMenu</name>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="23"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="24"/>
         <source>Open</source>
         <translation>Apri</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="24"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="25"/>
         <source>Rename…</source>
         <translation>Rinomina…</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="29"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="30"/>
         <source>Move to</source>
         <translation>Sposta in</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="32"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="33"/>
         <source>Standalone notes</source>
         <translation>Note libere</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="57"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="58"/>
         <source>Move to Trash</source>
         <translation>Sposta nel cestino</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="65"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="67"/>
         <source>Restore</source>
         <translation>Ripristina</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/NoteMenu.qml" line="66"/>
+        <location filename="../src/app/qml/library/NoteMenu.qml" line="68"/>
         <source>Delete forever…</source>
         <translation>Elimina definitivamente…</translation>
     </message>
@@ -832,9 +832,37 @@
         <translation>Pagina %1</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/editor/PagesPanel.qml" line="123"/>
+        <location filename="../src/app/qml/editor/PagesPanel.qml" line="124"/>
         <source>Add page</source>
         <translation>Aggiungi pagina</translation>
+    </message>
+</context>
+<context>
+    <name>SelectionMenu</name>
+    <message>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="55"/>
+        <source>Copy</source>
+        <translation>Copia</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="56"/>
+        <source>Cut</source>
+        <translation>Taglia</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="57"/>
+        <source>Duplicate</source>
+        <translation>Duplica</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="61"/>
+        <source>Color</source>
+        <translation>Colore</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/editor/SelectionMenu.qml" line="66"/>
+        <source>Delete</source>
+        <translation>Elimina</translation>
     </message>
 </context>
 <context>

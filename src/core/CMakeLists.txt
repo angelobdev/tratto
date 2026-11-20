@@ -14,6 +14,8 @@ add_library(tratto_core STATIC
     command.cpp
     include/tratto/core/stroke_geometry.h
     stroke_geometry.cpp
+    include/tratto/core/selection.h
+    selection.cpp
 )
 target_include_directories(tratto_core PUBLIC include)
 target_link_libraries(tratto_core PUBLIC Qt6::Core)

@@ -70,7 +70,7 @@ System dependencies (Qt ≥ 6.8, CMake ≥ 3.21, a C++23 compiler):
 
 - Proceed by milestone and, within a milestone, in small steps that compile.
 - At the end of each step: build, tests and clang-format all clean, with no compiler warnings.
-- **Every user-facing flow gets a UI test** in `tests/app/tst_ui.cpp` (click, tap, right click, press and hold). Screenshots alone don't prove that something can be clicked.
+- **Every user-facing flow gets a UI test** in `tests/app/tst_ui.cpp` (click, tap, right click, press and hold). Screenshots alone don't prove that something can be clicked. `TRATTO_UI_DUMP=<dir>` (with the OpenGL backend) saves screenshots at the test's `dump()` points.
 - **Scripted edits must fail loudly:** when changing files with a script, assert that each text to replace is found exactly once.
 - When touching input, rendering or gestures, ask for a test on a real 2-in-1 and say exactly what to try: pressure, the eraser (tip or barrel button), a resting palm, pinch.
 - Stroke performance matters more than anything else. If a choice makes latency worse, flag it.

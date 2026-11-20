@@ -162,11 +162,15 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
   - `ReplaceObjects` puts the pieces where the original was in the drawing order; one drag is one undo step;
   - "highlighter only" option (both modes).
 - **Eraser cursor:** a ring of the eraser's size follows the stylus while hovering (also with the eraser tip or the barrel button held) and the mouse.
-- **Lasso selection:** a polygon; a stroke is selected when most of its points fall inside (configurable threshold).
-- **Rectangle selection:** intersection with the bbox.
-- **Selection actions:**
-  - move, resize with handles, recolor, copy/cut/duplicate/delete;
-  - clipboard: internal MIME format + PNG for other apps.
+- **Lasso selection:** a polygon; a stroke is selected when more than half of its points fall inside (`core::selectByLasso`, threshold configurable).
+- **Rectangle selection:** objects whose bbox intersects the rectangle.
+- **Moving and resizing** (`canvasselection.cpp`):
+  - drag inside the selection box to move, drag a corner handle to scale proportionally from the opposite corner; stroke widths scale too;
+  - while dragging, the selection is *lifted*: removed from the tile snapshot and drawn as GPU geometry following the transform;
+  - on release one `ReplaceObjects` swaps each object for its transformed copy with the same id, so undo restores the exact original points.
+- **Selection actions:** the dark menu from the design under (or above) the selection: copy, cut, duplicate, color (pen colors), delete. Shortcuts: Ctrl+C/X/V/D, Delete/Backspace, Esc, Ctrl+A (switches to the selection tool). Changing tool or page clears the selection.
+- **Clipboard:** `application/x-tratto-objects` (a page in the storage format, so it works across notes) plus a PNG of the selection for other apps. Pasted objects get new ids, land 16 pt lower-right and become the selection.
+- **Overlays:** the canvas filters stylus events at the window level, so items drawn over it (selection menu, zoom pill) are listed in `CanvasItem.overlays`; there the stylus reaches them instead of the canvas.
 - **Text:**
   - a tap creates a `TextBox`;
   - while editing, a QML `TextEdit` is overlaid on the canvas; when it loses focus the edit becomes a command;

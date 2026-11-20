@@ -2,6 +2,7 @@
 // The real UI (Main.qml and the whole QML module) driven with mouse, touch and
 // right clicks: navigation between the library and the editor, context menus.
 #include "appservices.h"
+#include "canvasitem.h"
 
 #include <QPointingDevice>
 #include <QQmlApplicationEngine>
@@ -69,6 +70,18 @@ private:
     }
 
     QList<QQuickItem *> cards() const { return items("noteCard"); }
+
+    // Visual check: with TRATTO_UI_DUMP=<dir> (and a GPU backend, see CLAUDE.md),
+    // saves the window as <dir>/<name>.png.
+    void dump(const char *name) const
+    {
+        const QString dir = qEnvironmentVariable("TRATTO_UI_DUMP");
+        if (!dir.isEmpty()) {
+            QTest::qWait(300); // let tiles render
+            m_window->grabWindow().save(dir + QLatin1Char('/') + QString::fromLatin1(name)
+                                        + QStringLiteral(".png"));
+        }
+    }
 
     int depth() const { return find("stack")->property("depth").toInt(); }
     bool busy() const { return find("stack")->property("busy").toBool(); }
@@ -187,6 +200,41 @@ private slots:
         QTRY_VERIFY(cardTitled(QStringLiteral("First")));
         click(cardTitled(QStringLiteral("First")));
         QTRY_COMPARE(depth(), 2);
+    }
+
+    void selectionMenuDeletesTheSelection()
+    {
+        click(cards().first());
+        QTRY_COMPARE(depth(), 2);
+        QTRY_VERIFY(!busy());
+        QTRY_VERIFY(!items("canvas").isEmpty());
+        auto *canvas = qobject_cast<CanvasItem *>(items("canvas").first());
+        QVERIFY(canvas);
+        QTRY_VERIFY(canvas->session()->loaded());
+
+        const QPointF origin = canvas->mapToScene(QPointF(0, 0));
+        const auto at = [&](double x, double y) { return (origin + QPointF(x, y)).toPoint(); };
+        // Draw with the pen.
+        QTest::mousePress(m_window, Qt::LeftButton, { }, at(300, 200));
+        for (int i = 1; i <= 10; ++i)
+            QTest::mouseMove(m_window, at(300 + 10 * i, 200));
+        QTest::mouseRelease(m_window, Qt::LeftButton, { }, at(400, 200));
+        QCOMPARE(canvas->session()->page(0)->objects.size(), 1u);
+
+        // Rectangle selection around it, then Delete from the menu.
+        canvas->tools()->setTool(EditorTools::Tool::Select);
+        canvas->tools()->setProperty("selectionMode",
+                                     QVariant::fromValue(EditorTools::SelectionMode::Rectangle));
+        QTest::mousePress(m_window, Qt::LeftButton, { }, at(280, 180));
+        for (int i = 1; i <= 10; ++i)
+            QTest::mouseMove(m_window, at(280 + 14 * i, 180 + 4 * i));
+        QTest::mouseRelease(m_window, Qt::LeftButton, { }, at(420, 220));
+        QVERIFY(canvas->hasSelection());
+        QTRY_VERIFY(!items("selectionDelete").isEmpty());
+        dump("selection");
+        click(items("selectionDelete").first());
+        QTRY_COMPARE(canvas->session()->page(0)->objects.size(), 0u);
+        QVERIFY(!canvas->hasSelection());
     }
 
     void pressAndHoldOpensTheMenu()

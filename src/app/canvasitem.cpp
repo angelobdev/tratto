@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "canvasitem.h"
 
+#include "canvasgeometry.h"
 #include "editortools.h"
 #include "notesession.h"
 #include "preferences.h"
@@ -29,11 +30,10 @@
 #include <numbers>
 
 namespace core = tratto::core;
+using namespace canvasgeometry;
 
 namespace {
 
-// 100% zoom shows an A4 page 680 px wide, as in the design.
-constexpr double kPixelsPerPointAt100 = 680.0 / 595.28;
 constexpr std::array<double, 7> kZoomLevels = { 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0 };
 constexpr int kDefaultLevel = 2;
 
@@ -50,8 +50,6 @@ constexpr double kMarginTop = 32.0;
 constexpr double kMarginBottom = 96.0;
 constexpr double kMarginSide = 24.0;
 
-constexpr int kCircleSegments = 12;
-
 quint64 tileKey(int level, int tx, int ty)
 {
     return (static_cast<quint64>(level) << 40) | (static_cast<quint64>(tx) << 20)
@@ -62,124 +60,6 @@ int keyLevel(quint64 key)
 {
     return static_cast<int>(key >> 40);
 }
-
-void appendCircle(std::vector<QPointF> &tris, QPointF c, double r)
-{
-    for (int i = 0; i < kCircleSegments; ++i) {
-        const double a0 = 2 * std::numbers::pi * i / kCircleSegments;
-        const double a1 = 2 * std::numbers::pi * (i + 1) / kCircleSegments;
-        tris.push_back(c);
-        tris.emplace_back(c.x() + r * std::cos(a0), c.y() + r * std::sin(a0));
-        tris.emplace_back(c.x() + r * std::cos(a1), c.y() + r * std::sin(a1));
-    }
-}
-
-// Triangles for a stroke, for the live preview and pending strokes. Pen strokes
-// get round joins and caps; highlighter strokes don't, because overlapping
-// translucent triangles would show as darker spots.
-std::vector<QPointF> strokeTriangles(const std::vector<core::StrokePoint> &points, float width,
-                                     bool highlighter)
-{
-    std::vector<QPointF> tris;
-    if (points.empty())
-        return tris;
-    const core::StrokeRibbon r = core::ribbon(points, width, !highlighter);
-    if (points.size() == 1) {
-        appendCircle(tris, { points[0].x, points[0].y }, r.radii[0]);
-        return tris;
-    }
-    tris.reserve(points.size() * (highlighter ? 6 : 6 + 3 * kCircleSegments));
-    for (std::size_t i = 0; i + 1 < points.size(); ++i) {
-        tris.insert(tris.end(), { r.left[i], r.right[i], r.left[i + 1] });
-        tris.insert(tris.end(), { r.right[i], r.right[i + 1], r.left[i + 1] });
-    }
-    if (!highlighter) {
-        for (std::size_t i = 0; i < points.size(); ++i)
-            appendCircle(tris, { points[i].x, points[i].y }, r.radii[i]);
-    }
-    return tris;
-}
-
-// Triangles in page pt, mapped to item px with `offset + pt * scale`.
-// (Everything is placed in item coordinates rather than under a QSGTransformNode:
-// the software scene graph renderer ignores the scale for image nodes.)
-QSGGeometryNode *makeTriangleNode(const std::vector<QPointF> &tris, const QColor &color,
-                                  QPointF offset, double scale)
-{
-    auto *geometry
-        = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), static_cast<int>(tris.size()));
-    geometry->setDrawingMode(QSGGeometry::DrawTriangles);
-    QSGGeometry::Point2D *v = geometry->vertexDataAsPoint2D();
-    for (std::size_t i = 0; i < tris.size(); ++i)
-        v[i].set(static_cast<float>(offset.x() + tris[i].x() * scale),
-                 static_cast<float>(offset.y() + tris[i].y() * scale));
-
-    auto *material = new QSGFlatColorMaterial;
-    material->setColor(color);
-
-    auto *node = new QSGGeometryNode;
-    node->setGeometry(geometry);
-    node->setFlag(QSGNode::OwnsGeometry);
-    node->setMaterial(material);
-    node->setFlag(QSGNode::OwnsMaterial);
-    return node;
-}
-
-// A ring (annulus) as a triangle strip, in item px.
-QSGGeometryNode *makeRingNode(QPointF center, double inner, double outer, const QColor &color)
-{
-    constexpr int segments = 48;
-    auto *geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 2 * (segments + 1));
-    geometry->setDrawingMode(QSGGeometry::DrawTriangleStrip);
-    QSGGeometry::Point2D *v = geometry->vertexDataAsPoint2D();
-    for (int i = 0; i <= segments; ++i) {
-        const double a = 2 * std::numbers::pi * i / segments;
-        const double c = std::cos(a), s = std::sin(a);
-        v[2 * i].set(static_cast<float>(center.x() + inner * c),
-                     static_cast<float>(center.y() + inner * s));
-        v[2 * i + 1].set(static_cast<float>(center.x() + outer * c),
-                         static_cast<float>(center.y() + outer * s));
-    }
-    auto *material = new QSGFlatColorMaterial;
-    material->setColor(color);
-    auto *node = new QSGGeometryNode;
-    node->setGeometry(geometry);
-    node->setFlag(QSGNode::OwnsGeometry);
-    node->setMaterial(material);
-    node->setFlag(QSGNode::OwnsMaterial);
-    return node;
-}
-
-void deleteChildren(QSGNode *parent)
-{
-    while (QSGNode *child = parent->firstChild()) {
-        parent->removeChildNode(child);
-        delete child;
-    }
-}
-
-// Scene graph layout of the canvas.
-struct CanvasRoot : QSGNode
-{
-    QSGNode *frame = new QSGNode;
-    QSGNode *page = new QSGNode;
-    QSGNode *previousTiles = new QSGNode;
-    QSGNode *tiles = new QSGNode;
-    QSGNode *pending = new QSGNode;
-    QSGNode *live = new QSGNode;
-    QSGNode *cursor = new QSGNode;
-
-    CanvasRoot()
-    {
-        appendChildNode(frame);
-        appendChildNode(page);
-        page->appendChildNode(previousTiles);
-        page->appendChildNode(tiles);
-        page->appendChildNode(pending);
-        page->appendChildNode(live);
-        appendChildNode(cursor);
-    }
-};
 
 } // namespace
 
@@ -229,7 +109,15 @@ void CanvasItem::setTools(EditorTools *tools)
 {
     if (tools == m_tools)
         return;
+    if (m_tools)
+        disconnect(m_tools, nullptr, this, nullptr);
     m_tools = tools;
+    if (m_tools) {
+        connect(m_tools, &EditorTools::changed, this, [this] {
+            if (m_tools->tool() != EditorTools::Tool::Select && !selectionBusy())
+                clearSelection();
+        });
+    }
     emit toolsChanged();
 }
 
@@ -296,7 +184,9 @@ void CanvasItem::setView(double zoom, QPointF offset)
     m_zoom = std::clamp(zoom, kZoomLevels.front(), kZoomLevels.back());
     m_offset = offset;
     clampOffset();
-    m_pendingDirty = m_liveDirty = true; // their geometry is in item px
+    m_pendingDirty = m_liveDirty = m_selectionDirty = true; // their geometry is in item px
+    if (!m_selection.empty())
+        emit selectionChanged(); // the menu follows the selection
     updateTiles();
     update();
     emit viewChanged();
@@ -524,11 +414,16 @@ void CanvasItem::resetPage()
     m_tiles.clear();
     m_pending.clear();
     m_pendingDirty = true;
+    m_selection.clear();
+    m_lassoPoints.clear();
+    m_lifted = false;
+    m_liftedTriangles.clear();
+    m_selectionDirty = true;
     m_previousLevel = -1;
     ++m_generation;
 
-    const core::Page *page = m_session ? m_session->page(m_pageIndex) : nullptr;
-    m_snapshot = page ? std::make_shared<const core::Page>(*page) : nullptr;
+    refreshSnapshot();
+    emit selectionChanged();
     if (!m_viewInitialized && m_snapshot && width() > 0) {
         m_viewInitialized = true;
         resetView();
@@ -553,7 +448,9 @@ void CanvasItem::onPageChanged(int index, QRectF bounds)
         return;
     }
     ++m_generation;
-    m_snapshot = std::make_shared<const core::Page>(*page);
+    refreshSnapshot();
+    if (!m_selection.empty() && !selectionBusy())
+        refreshSelection(); // undo/redo may have removed or moved selected objects
     // Pending strokes that are gone (undo) disappear at once.
     std::erase_if(m_pending, [page](const PendingStroke &p) { return !page->find(p.id); });
     m_pendingDirty = true;
@@ -595,7 +492,9 @@ bool CanvasItem::handleTablet(QTabletEvent *event)
 {
     const QPointF pos = mapFromScene(event->scenePosition());
     const bool ours = m_gesture != Gesture::None && m_source == Source::Stylus;
-    if (!ours && (!isVisible() || !isEnabled() || !contains(pos))) {
+    if (!ours
+        && (!isVisible() || !isEnabled() || !contains(pos)
+            || overOverlay(event->scenePosition()))) {
         hideCursor();
         return false; // the stylus is over other UI: let Qt deliver it as a mouse
     }
@@ -653,8 +552,12 @@ void CanvasItem::beginInput(QPointF itemPos, float pressure, Source source, bool
         eraseAt(itemPos);
         return;
     }
+    if (tool == EditorTools::Tool::Select) {
+        beginSelectionGesture(itemPos);
+        return;
+    }
     if (tool != EditorTools::Tool::Pen && tool != EditorTools::Tool::Highlighter)
-        return; // text, selection and image tools arrive in M3
+        return; // text and image tools arrive later in M3
 
     m_gesture = Gesture::Drawing;
     m_liveIsHighlighter = tool == EditorTools::Tool::Highlighter;
@@ -676,6 +579,10 @@ void CanvasItem::beginInput(QPointF itemPos, float pressure, Source source, bool
 
 void CanvasItem::continueInput(QPointF itemPos, float pressure)
 {
+    if (selectionBusy()) {
+        continueSelectionGesture(itemPos);
+        return;
+    }
     if (m_gesture == Gesture::Erasing) {
         eraseAt(itemPos);
         return;
@@ -704,6 +611,10 @@ void CanvasItem::continueInput(QPointF itemPos, float pressure)
 
 void CanvasItem::endInput()
 {
+    if (selectionBusy()) {
+        endSelectionGesture();
+        return;
+    }
     if (m_gesture == Gesture::Erasing) {
         m_session->endGroup();
         m_gesture = Gesture::None;
@@ -756,6 +667,19 @@ void CanvasItem::cancelInput()
 {
     if (m_gesture == Gesture::Erasing && m_session)
         m_session->endGroup();
+    if (selectionBusy()) {
+        // Put a lifted selection back where it was.
+        m_gesture = Gesture::None;
+        m_lassoPoints.clear();
+        if (m_lifted) {
+            m_lifted = false;
+            m_liftedTriangles.clear();
+            ++m_generation;
+            refreshSnapshot();
+            invalidate(m_selectionBounds);
+        }
+        setSelection(m_selection);
+    }
     m_gesture = Gesture::None;
     if (!m_livePoints.empty()) {
         m_livePoints.clear();
@@ -1051,7 +975,7 @@ QSGNode *CanvasItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             t.node = nullptr;
             t.upload = !t.image.isNull();
         }
-        m_pendingDirty = m_liveDirty = m_cursorDirty = true;
+        m_pendingDirty = m_liveDirty = m_cursorDirty = m_selectionDirty = true;
     }
 
     for (QSGNode *node : m_nodesToDelete) {
@@ -1111,6 +1035,12 @@ QSGNode *CanvasItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         for (const PendingStroke &p : m_pending)
             root->pending->appendChildNode(makeTriangleNode(p.triangles, p.color, m_offset, s));
         m_pendingDirty = false;
+    }
+
+    if (m_selectionDirty) {
+        deleteChildren(root->selection);
+        buildSelectionNodes(root->selection);
+        m_selectionDirty = false;
     }
 
     if (m_cursorDirty) {

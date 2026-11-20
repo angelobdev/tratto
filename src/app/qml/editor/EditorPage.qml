@@ -43,6 +43,19 @@ Page {
     Shortcut { sequences: [StandardKey.ZoomIn, "Ctrl+="]; onActivated: canvas.zoomIn() }
     Shortcut { sequences: [StandardKey.ZoomOut]; onActivated: canvas.zoomOut() }
     Shortcut { sequences: [StandardKey.Undo]; onActivated: session.undo() }
+    Shortcut { sequences: [StandardKey.Copy]; enabled: canvas.hasSelection; onActivated: canvas.copySelection() }
+    Shortcut { sequences: [StandardKey.Cut]; enabled: canvas.hasSelection; onActivated: canvas.cutSelection() }
+    Shortcut { sequences: [StandardKey.Paste]; onActivated: canvas.paste() }
+    Shortcut { sequence: "Ctrl+D"; enabled: canvas.hasSelection; onActivated: canvas.duplicateSelection() }
+    Shortcut { sequences: [StandardKey.Delete, "Backspace"]; enabled: canvas.hasSelection; onActivated: canvas.deleteSelection() }
+    Shortcut { sequence: "Escape"; enabled: canvas.hasSelection; onActivated: canvas.clearSelection() }
+    Shortcut {
+        sequences: [StandardKey.SelectAll]
+        onActivated: {
+            tools.tool = EditorTools.Select
+            canvas.selectAll()
+        }
+    }
     Shortcut { sequences: [StandardKey.Redo, "Ctrl+Shift+Z"]; onActivated: session.redo() }
 
     header: ColumnLayout {
@@ -74,13 +87,27 @@ Page {
             CanvasItem {
                 id: canvas
 
+                objectName: "canvas"
                 anchors.fill: parent
                 session: session
                 tools: tools
                 frameColor: Theme.border
+                accentColor: Theme.accentInk
+                // The stylus goes to these, not to the canvas underneath.
+                overlays: [zoomControl, selectionMenu]
+            }
+
+            SelectionMenu {
+                id: selectionMenu
+
+                objectName: "selectionMenu"
+                canvas: canvas
+                tools: tools
             }
 
             ZoomControl {
+                id: zoomControl
+
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: Theme.gapL
