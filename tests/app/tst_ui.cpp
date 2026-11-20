@@ -278,6 +278,18 @@ private slots:
         QCOMPARE(highlighters, 2);
     }
 
+    void undoAndRedoFromTheKeyboard()
+    {
+        CanvasItem *canvas = openEditor();
+        QVERIFY(canvas);
+        dragOn(canvas, { 300, 200 }, { 400, 200 });
+        QCOMPARE(canvas->session()->page(0)->objects.size(), 1u);
+        QTest::keyClick(m_window, Qt::Key_Z, Qt::ControlModifier);
+        QCOMPARE(canvas->session()->page(0)->objects.size(), 0u);
+        QTest::keyClick(m_window, Qt::Key_Z, Qt::ControlModifier | Qt::ShiftModifier);
+        QCOMPARE(canvas->session()->page(0)->objects.size(), 1u);
+    }
+
     void selectionMenuDeletesTheSelection()
     {
         click(cards().first());

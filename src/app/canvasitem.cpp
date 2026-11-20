@@ -41,8 +41,9 @@ constexpr int kTileSize = 512; // device px
 constexpr double kMinSampleDistancePx = 0.5; // ARCHITECTURE §5
 constexpr double kEraserRadiusPx = 10.0; // whole-stroke eraser, screen px
 constexpr qint64 kPalmGuardMs = 500; // ignore touch this long after stylus activity
-constexpr qint64 kTapMaxMs = 250;
-constexpr double kTapMaxMovePx = 12.0;
+// Two/three-finger taps: real fingers land and lift a little apart and wobble.
+constexpr qint64 kTapMaxMs = 400;
+constexpr double kTapMaxMovePx = 20.0;
 constexpr int kSettleDelayMs = 150;
 
 // View margins around the page, item px (from the design).
@@ -883,7 +884,10 @@ void CanvasItem::touchEvent(QTouchEvent *event)
             m_touchStart.insert(p.id(), p.position());
         if (p.state() != QEventPoint::Released)
             active.append(p);
-        if (QLineF(m_touchStart.value(p.id(), p.position()), p.position()).length() > kTapMaxMovePx)
+        // Stationary points haven't moved by definition (and may carry no position).
+        if (p.state() != QEventPoint::Stationary
+            && QLineF(m_touchStart.value(p.id(), p.position()), p.position()).length()
+                > kTapMaxMovePx)
             m_touchMoved = true;
     }
     m_touchMaxPoints = std::max(m_touchMaxPoints, static_cast<int>(active.size()));

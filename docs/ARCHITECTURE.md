@@ -137,7 +137,7 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
 - **Mouse:** constant pressure 0.5; middle button drags to pan; wheel scrolls (Shift: sideways), Ctrl+wheel and touchpad pinch zoom. Mouse events synthesized from touch are ignored.
 - **Fingers:**
   - With **"Stylus only"** on (the default in tablet mode), a finger never draws.
-  - One finger scrolls, two fingers zoom, a two-finger tap undoes and a three-finger tap redoes (tap: < 250 ms, < 12 px of movement).
+  - One finger scrolls, two fingers zoom, a two-finger tap undoes and a three-finger tap redoes (tap: < 400 ms from the first finger down to the last up, < 20 px of movement per finger).
   - With "Stylus only" off, one finger draws with the current tool.
   - **Palm rejection:** touches are ignored while the stylus is down or was active in the last 500 ms; a stylus touching down cancels any finger gesture.
 

@@ -287,6 +287,35 @@ private slots:
         QCOMPARE(strokeCount(*m_session), 0);
     }
 
+    void threeFingerTapRedoes()
+    {
+        drag({ 300, 300 }, { 500, 350 });
+        m_session->undo();
+        QCOMPARE(strokeCount(*m_session), 0);
+        // Fingers land and lift a little apart in time and wobble, as real ones do.
+        QTest::touchEvent(m_window.get(), m_touch).press(0, { 300, 300 });
+        QTest::touchEvent(m_window.get(), m_touch).stationary(0).press(1, { 380, 300 });
+        QTest::qWait(60);
+        QTest::touchEvent(m_window.get(), m_touch)
+            .stationary(0)
+            .stationary(1)
+            .press(2, { 460, 300 });
+        QTest::touchEvent(m_window.get(), m_touch)
+            .move(0, { 306, 305 })
+            .move(1, { 386, 296 })
+            .move(2, { 455, 306 });
+        QTest::qWait(150);
+        QTest::touchEvent(m_window.get(), m_touch)
+            .release(0, { 306, 305 })
+            .stationary(1)
+            .stationary(2);
+        QTest::qWait(40);
+        QTest::touchEvent(m_window.get(), m_touch)
+            .release(1, { 386, 296 })
+            .release(2, { 455, 306 });
+        QCOMPARE(strokeCount(*m_session), 1);
+    }
+
     void pinchZooms()
     {
         QCOMPARE(m_canvas->zoom(), 1.0);

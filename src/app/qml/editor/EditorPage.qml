@@ -56,7 +56,9 @@ Page {
             canvas.selectAll()
         }
     }
-    Shortcut { sequences: [StandardKey.Redo, "Ctrl+Shift+Z"]; onActivated: session.redo() }
+    // StandardKey.Redo is already Ctrl+Shift+Z (and Ctrl+Y where usual); listing the same
+    // keys twice makes the shortcut ambiguous, and Qt then doesn't trigger it.
+    Shortcut { sequences: [StandardKey.Redo]; onActivated: session.redo() }
 
     header: ColumnLayout {
         spacing: 0
