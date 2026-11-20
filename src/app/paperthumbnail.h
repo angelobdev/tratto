@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QQuickPaintedItem>
+#include <QRectF>
 #include <QtQml/qqmlregistration.h>
 
 // A page's paper (color + pattern) scaled to the item size, drawn with the same
@@ -15,6 +16,9 @@ class PaperThumbnail : public QQuickPaintedItem
     Q_PROPERTY(Pattern pattern READ pattern WRITE setPattern NOTIFY paperChanged FINAL)
     Q_PROPERTY(qreal spacingMm READ spacingMm WRITE setSpacingMm NOTIFY paperChanged FINAL)
     Q_PROPERTY(QColor paperColor READ paperColor WRITE setPaperColor NOTIFY paperChanged FINAL)
+    // Part of the page to show, in pt; empty shows the whole page. A small area makes
+    // the pattern readable in tiny previews.
+    Q_PROPERTY(QRectF viewport READ viewport WRITE setViewport NOTIFY paperChanged FINAL)
     // Corner radius in item pixels; the paper is clipped to it.
     Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY paperChanged FINAL)
 
@@ -32,6 +36,8 @@ public:
     void setSpacingMm(qreal spacingMm);
     QColor paperColor() const { return m_paperColor; }
     void setPaperColor(const QColor &color);
+    QRectF viewport() const { return m_viewport; }
+    void setViewport(const QRectF &viewport);
     qreal radius() const { return m_radius; }
     void setRadius(qreal radius);
 
@@ -43,4 +49,5 @@ private:
     qreal m_spacingMm = 0.0;
     QColor m_paperColor = Qt::white;
     qreal m_radius = 0.0;
+    QRectF m_viewport;
 };

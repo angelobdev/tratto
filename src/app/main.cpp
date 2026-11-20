@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
         QStringLiteral("file"));
     const QCommandLineOption pageOption(
         QStringLiteral("page"),
-        QStringLiteral("Open <page> at startup: library, settings or editor (development)."),
+        QStringLiteral(
+            "Open <page> at startup: library, settings, editor or new-note (development)."),
         QStringLiteral("page"), QStringLiteral("library"));
     const QCommandLineOption dataDirOption(
         QStringLiteral("data-dir"),

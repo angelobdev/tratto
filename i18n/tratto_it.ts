@@ -385,116 +385,111 @@
         <translation>Importa</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="136"/>
-        <source>Untitled note</source>
-        <translation>Nota senza titolo</translation>
-    </message>
-    <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="151"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="149"/>
         <source>Groups</source>
         <translation>Gruppi</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="195"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="193"/>
         <source>Notes</source>
         <translation>Note</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="205"/>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="348"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="203"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="357"/>
         <source>Empty trash</source>
         <translation>Svuota cestino</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="238"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="236"/>
         <source>Notes in the trash are deleted for good after 30 days.</source>
         <translation>Le note nel cestino vengono eliminate definitivamente dopo 30 giorni.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="248"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="246"/>
         <source>The trash is empty.</source>
         <translation>Il cestino è vuoto.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="249"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="247"/>
         <source>No notes match “%1”.</source>
         <translation>Nessuna nota corrisponde a “%1”.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="250"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="248"/>
         <source>No notes yet. Start one with New note.</source>
         <translation>Ancora nessuna nota. Iniziane una con Nuova nota.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="251"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="249"/>
         <source>No notes here yet.</source>
         <translation>Ancora nessuna nota qui.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="300"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="303"/>
         <source>Rename note</source>
         <translation>Rinomina nota</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="301"/>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="310"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="304"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="313"/>
         <source>Rename</source>
         <translation>Rinomina</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="302"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="305"/>
         <source>Title</source>
         <translation>Titolo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="309"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="312"/>
         <source>Rename group</source>
         <translation>Rinomina gruppo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="311"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="314"/>
         <source>Group name</source>
         <translation>Nome del gruppo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="324"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="333"/>
         <source>Delete forever?</source>
         <translation>Eliminare definitivamente?</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="325"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="334"/>
         <source>“%1” will be deleted for good. This can&apos;t be undone.</source>
-        <translation>“%1” verrà eliminata definitivamente. L'operazione non si può annullare.</translation>
+        <translation>“%1” verrà eliminata definitivamente. L&apos;operazione non si può annullare.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="326"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="335"/>
         <source>Delete</source>
         <translation>Elimina</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="333"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="342"/>
         <source>Delete group?</source>
         <translation>Eliminare il gruppo?</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="334"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="343"/>
         <source>The group “%1” will be deleted. Its notes become standalone notes.</source>
         <translation>Il gruppo “%1” verrà eliminato. Le sue note diventeranno note libere.</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="335"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="344"/>
         <source>Delete group</source>
         <translation>Elimina gruppo</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="346"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="355"/>
         <source>Empty the trash?</source>
         <translation>Svuotare il cestino?</translation>
     </message>
     <message>
-        <location filename="../src/app/qml/library/LibraryPage.qml" line="347"/>
+        <location filename="../src/app/qml/library/LibraryPage.qml" line="356"/>
         <source>%1 will be deleted for good. This can&apos;t be undone.</source>
-        <translation>%1 verranno eliminate definitivamente. L'operazione non si può annullare.</translation>
+        <translation>%1 verranno eliminate definitivamente. L&apos;operazione non si può annullare.</translation>
     </message>
     <message>
         <location filename="../src/app/qml/library/LibraryPage.qml" line="42"/>
@@ -543,6 +538,229 @@
         <location filename="../src/app/qml/library/LibrarySidebar.qml" line="156"/>
         <source>Settings</source>
         <translation>Impostazioni</translation>
+    </message>
+</context>
+<context>
+    <name>NewNoteDialog</name>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="26"/>
+        <source>Blank</source>
+        <translation>Bianco</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="26"/>
+        <source>No lines</source>
+        <translation>Nessuna riga</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="27"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="28"/>
+        <source>Ruled</source>
+        <translation>Righe</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="27"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="28"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="29"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="30"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="31"/>
+        <source>%1 mm</source>
+        <translation>%1 mm</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="29"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="30"/>
+        <source>Grid</source>
+        <translation>Quadretti</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="31"/>
+        <source>Dotted</source>
+        <translation>Puntinato</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="35"/>
+        <source>White</source>
+        <translation>Bianco</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="35"/>
+        <source>white paper</source>
+        <translation>carta bianca</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="36"/>
+        <source>Ivory</source>
+        <translation>Avorio</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="36"/>
+        <source>ivory paper</source>
+        <translation>carta avorio</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="37"/>
+        <source>Pearl gray</source>
+        <translation>Grigio perla</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="37"/>
+        <source>pearl gray paper</source>
+        <translation>carta grigio perla</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="38"/>
+        <source>Sage</source>
+        <translation>Salvia</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="38"/>
+        <source>sage paper</source>
+        <translation>carta salvia</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="39"/>
+        <source>Slate</source>
+        <translation>Ardesia</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="39"/>
+        <source>slate paper</source>
+        <translation>carta ardesia</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="106"/>
+        <source>New note</source>
+        <translation>Nuova nota</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="117"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="155"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="168"/>
+        <source>Title</source>
+        <translation>Titolo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="156"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="184"/>
+        <source>Group</source>
+        <translation>Gruppo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="164"/>
+        <source>Untitled</source>
+        <translation>Senza titolo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="185"/>
+        <source>None (standalone note)</source>
+        <translation>Nessuno (nota libera)</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="187"/>
+        <source>+ New group…</source>
+        <translation>+ Nuovo gruppo…</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="206"/>
+        <source>Blank document</source>
+        <translation>Documento vuoto</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="207"/>
+        <source>Choose background, color and format</source>
+        <translation>Scegli sfondo, colore e formato</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="208"/>
+        <source>Import PDF or image</source>
+        <translation>Importa PDF o immagine</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="209"/>
+        <source>Annotate an existing file</source>
+        <translation>Annota sopra un file esistente</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="284"/>
+        <source>Background</source>
+        <translation>Sfondo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="375"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="619"/>
+        <source>Paper color</source>
+        <translation>Colore carta</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="435"/>
+        <source>Custom</source>
+        <translation>Personalizzato</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="479"/>
+        <source>Format</source>
+        <translation>Formato</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="486"/>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="571"/>
+        <source>Continuous</source>
+        <translation>Continuo</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="496"/>
+        <source>Orientation</source>
+        <translation>Orientamento</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="501"/>
+        <source>Portrait</source>
+        <translation>Verticale</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="502"/>
+        <source>Landscape</source>
+        <translation>Orizzontale</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="533"/>
+        <source>Preview</source>
+        <translation>Anteprima</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="570"/>
+        <source>custom paper</source>
+        <translation>carta personalizzata</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="573"/>
+        <source>portrait</source>
+        <translation>verticale</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="573"/>
+        <source>landscape</source>
+        <translation>orizzontale</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="599"/>
+        <source>Use as default for new notes</source>
+        <translation>Usa come predefinito per le nuove note</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="604"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location filename="../src/app/qml/library/NewNoteDialog.qml" line="610"/>
+        <source>Create note</source>
+        <translation>Crea nota</translation>
     </message>
 </context>
 <context>

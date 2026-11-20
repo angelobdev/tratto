@@ -261,7 +261,7 @@ notes/<note-id>/
   - search filters titles in memory;
   - note and group actions are in a context menu (right click, or press and hold with finger or stylus): open, rename, move to a group or out of it, move to the trash; in the trash: restore, delete forever, empty trash. Groups: create (name + color), rename, delete (its notes become standalone). Simple dialogs in the app's style; these screens are not in the design.
   - the note title is edited in place in the editor's top bar.
-- **New note:** a dialog with a live preview of the paper.
+- **New note:** a dialog from the design: title, group (with "+ New group…"), background, paper color, format and orientation, with a live preview. "Use as default for new notes" saves the paper in the settings. Importing a PDF or image is shown but disabled until M4. "Continuous" creates an A4 page for now; pages that grow with the content come later.
 - **Settings:**
   - a page in the `StackView` (not a dialog): a section list on the left (General, Appearance, Pen and input, New notes, Export, Storage and backup, About) and the selected section on the right;
   - preferences are saved with `QSettings` to `settings.ini` in the per-user config folder (`~/.config/tratto/` on Linux): theme, accent color, language, tablet mode, input options;

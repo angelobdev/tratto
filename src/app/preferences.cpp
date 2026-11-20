@@ -14,6 +14,18 @@ const QString kTabletMode = QStringLiteral("input/tabletMode");
 const QString kStylusOnly = QStringLiteral("input/stylusOnly");
 const QString kBarrelButtonErases = QStringLiteral("input/barrelButtonErases");
 const QString kTapToUndo = QStringLiteral("input/tapToUndo");
+const QString kNewNotePaper = QStringLiteral("newNote/paper");
+
+// White, ruled 6 mm, A4 portrait (DESIGN.md defaults). Pattern/format/orientation
+// values follow the C++ enums (PaperThumbnail::Pattern, PageFormat, Orientation).
+QVariantMap defaultPaper()
+{
+    return { { QStringLiteral("pattern"), 1 },
+             { QStringLiteral("spacingMm"), 6.0 },
+             { QStringLiteral("color"), QStringLiteral("#FFFFFF") },
+             { QStringLiteral("format"), 0 },
+             { QStringLiteral("orientation"), 0 } };
+}
 
 } // namespace
 
@@ -29,6 +41,10 @@ Preferences::Preferences(QObject *parent)
     m_stylusOnly = s.value(kStylusOnly, m_stylusOnly).toBool();
     m_barrelButtonErases = s.value(kBarrelButtonErases, m_barrelButtonErases).toBool();
     m_tapToUndo = s.value(kTapToUndo, m_tapToUndo).toBool();
+    m_newNotePaper = defaultPaper();
+    const QVariantMap saved = s.value(kNewNotePaper).toMap();
+    for (auto it = saved.begin(); it != saved.end(); ++it)
+        m_newNotePaper.insert(it.key(), it.value());
 }
 
 Preferences *Preferences::create(QQmlEngine *, QJSEngine *)
@@ -55,6 +71,7 @@ void Preferences::save()
     s.setValue(kStylusOnly, m_stylusOnly);
     s.setValue(kBarrelButtonErases, m_barrelButtonErases);
     s.setValue(kTapToUndo, m_tapToUndo);
+    s.setValue(kNewNotePaper, m_newNotePaper);
     emit changed();
 }
 
@@ -87,5 +104,13 @@ void Preferences::setTapToUndo(bool on)
     if (on == m_tapToUndo)
         return;
     m_tapToUndo = on;
+    save();
+}
+
+void Preferences::setNewNotePaper(const QVariantMap &paper)
+{
+    if (paper == m_newNotePaper)
+        return;
+    m_newNotePaper = paper;
     save();
 }

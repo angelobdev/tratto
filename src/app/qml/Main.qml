@@ -37,7 +37,7 @@ ApplicationWindow {
         toolTipText: Theme.text
     }
 
-    // Page to show at startup: "library", "settings" or "editor" (--page, for development).
+    // Page to show at startup: "library", "settings", "editor" or "new-note" (--page, for development).
     property string startPage: "library"
 
     StackView {
@@ -50,6 +50,8 @@ ApplicationWindow {
         Component.onCompleted: {
             if (window.startPage === "settings")
                 stack.push(settingsPage, {}, StackView.Immediate)
+            else if (window.startPage === "new-note")
+                stack.currentItem.openNewNote()
         }
 
         // --page editor opens the most recent note once the library is loaded.

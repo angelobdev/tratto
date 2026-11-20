@@ -39,6 +39,7 @@ qt_add_qml_module(tratto
             qml/library/GroupCard.qml
         qml/library/GroupDialog.qml
         qml/library/GroupMenu.qml
+        qml/library/NewNoteDialog.qml
         qml/library/NoteMenu.qml
         qml/library/LibraryPage.qml
         qml/library/LibrarySidebar.qml

@@ -60,6 +60,14 @@ void PaperThumbnail::setRadius(qreal radius)
     emit paperChanged();
 }
 
+void PaperThumbnail::setViewport(const QRectF &viewport)
+{
+    if (viewport == m_viewport)
+        return;
+    m_viewport = viewport;
+    emit paperChanged();
+}
+
 void PaperThumbnail::paint(QPainter *painter)
 {
     namespace core = tratto::core;
@@ -81,6 +89,8 @@ void PaperThumbnail::paint(QPainter *painter)
         painter->setRenderHint(QPainter::Antialiasing, true);
         painter->setClipPath(clip);
     }
-    painter->scale(width() / page.width(), height() / page.height());
+    const QRectF view = m_viewport.isEmpty() ? QRectF(QPointF(0, 0), page) : m_viewport;
+    painter->scale(width() / view.width(), height() / view.height());
+    painter->translate(-view.topLeft());
     tratto::render::paintPaper(*painter, style, page);
 }

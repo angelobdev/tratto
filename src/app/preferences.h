@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QObject>
+#include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
 class QQmlEngine;
@@ -23,6 +24,9 @@ class Preferences : public QObject
                    changed FINAL)
     // Two-finger tap undoes, three-finger tap redoes.
     Q_PROPERTY(bool tapToUndo READ tapToUndo WRITE setTapToUndo NOTIFY changed FINAL)
+    // Paper for new notes: pattern, spacingMm, color, format, orientation (see NewNoteDialog).
+    Q_PROPERTY(
+        QVariantMap newNotePaper READ newNotePaper WRITE setNewNotePaper NOTIFY changed FINAL)
 
 public:
     enum class TabletMode { Automatic, Always, Never };
@@ -44,6 +48,8 @@ public:
     void setBarrelButtonErases(bool on);
     bool tapToUndo() const { return m_tapToUndo; }
     void setTapToUndo(bool on);
+    QVariantMap newNotePaper() const { return m_newNotePaper; }
+    void setNewNotePaper(const QVariantMap &paper);
 
 signals:
     void changed();
@@ -55,4 +61,5 @@ private:
     bool m_stylusOnly = true;
     bool m_barrelButtonErases = true;
     bool m_tapToUndo = true;
+    QVariantMap m_newNotePaper;
 };

@@ -132,9 +132,7 @@ Page {
                             primary: true
                             text: qsTr("New note")
                             iconName: "plus"
-                            // The New note dialog from the design replaces this in the next step.
-                            onClicked: page.openNote(Library.createNote(qsTr("Untitled note"), page.groupId,
-                                                                        PaperThumbnail.Ruled, 6, "#FFFFFF", 0, 0))
+                            onClicked: page.openNewNote()
                         }
                     }
                 }
@@ -261,6 +259,11 @@ Page {
     property var menuNote: ({})
     property var menuGroup: ({})
 
+    function openNewNote() {
+        newNoteDialog.preselectedGroup = page.groupId
+        newNoteDialog.open()
+    }
+
     function showNoteMenu(note) {
         menuNote = note
         noteMenu.popup()
@@ -310,6 +313,12 @@ Page {
         confirmText: qsTr("Rename")
         placeholderText: qsTr("Group name")
         onSubmitted: text => Library.renameGroup(page.menuGroup.id, text)
+    }
+
+    NewNoteDialog {
+        id: newNoteDialog
+
+        onCreated: noteId => page.openNote(noteId)
     }
 
     GroupDialog {
