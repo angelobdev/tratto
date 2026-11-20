@@ -139,6 +139,27 @@ private slots:
         QVERIFY(!inside(out, { 6.2, 5 }));
     }
 
+    void eraserHitTest()
+    {
+        Stroke s;
+        s.width = 2.0F; // half width 1 at constant width
+        s.tool = StrokeTool::Highlighter;
+        s.points = line(21);
+        s.updateBounds();
+        QVERIFY(touchesCircle(s, { 10, 2.5 }, 2.0)); // 2.5 <= 2 + 1
+        QVERIFY(!touchesCircle(s, { 10, 3.5 }, 2.0));
+        QVERIFY(touchesCircle(s, { 22.5, 0 }, 2.0)); // past the end, within reach
+        QVERIFY(!touchesCircle(s, { 40, 0 }, 2.0)); // rejected by the bounding box
+    }
+
+    void ribbonMatchesPressure()
+    {
+        const StrokeRibbon r = ribbon(line(3, 1.0F), 2.0F, true);
+        QCOMPARE(r.left.size(), 3u);
+        QVERIFY(std::abs(r.radii[1] - 1.4) < 1e-5);
+        QVERIFY(std::abs(r.left[1].y() - r.right[1].y() - 2.8) < 1e-5);
+    }
+
     void boundsIncludeMaximumWidth()
     {
         Stroke s;

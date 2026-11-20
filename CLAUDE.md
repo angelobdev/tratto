@@ -24,7 +24,9 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ./build/src/app/tratto
 cmake --build build --target format    # clang-format
-./build/src/app/tratto --screenshot shot.png [--page settings] [--color-scheme dark] [--language it]   # visual check, no display needed (QT_QPA_PLATFORM=offscreen)
+# Visual check without a display. Use the OpenGL backend: the software renderer misplaces the canvas.
+QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=rhi QSG_RHI_BACKEND=opengl \
+  ./build/src/app/tratto --screenshot shot.png [--page settings|editor] [--color-scheme dark] [--language it]
 ```
 
 System dependencies (Qt ≥ 6.8, CMake ≥ 3.21, a C++23 compiler):

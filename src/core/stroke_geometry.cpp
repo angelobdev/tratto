@@ -112,6 +112,28 @@ std::vector<StrokePoint> simplify(const std::vector<StrokePoint> &points, float 
     return out;
 }
 
+StrokeRibbon ribbon(const std::vector<StrokePoint> &points, float baseWidth, bool usePressure)
+{
+    StrokeRibbon r;
+    const std::size_t n = points.size();
+    r.left.resize(n);
+    r.right.resize(n);
+    r.radii.resize(n);
+    for (std::size_t i = 0; i < n; ++i) {
+        // Tangent from the neighbours; the normal is the tangent turned 90°.
+        const QPointF a = pos(points[i == 0 ? 0 : i - 1]);
+        const QPointF b = pos(points[i + 1 == n ? n - 1 : i + 1]);
+        QPointF tangent = b - a;
+        const double len = std::hypot(tangent.x(), tangent.y());
+        tangent = len > 0.0 ? tangent / len : QPointF(1, 0);
+        const QPointF normal(-tangent.y(), tangent.x());
+        r.radii[i] = 0.5 * baseWidth * (usePressure ? pressureScale(points[i].pressure) : 1.0F);
+        r.left[i] = pos(points[i]) + normal * r.radii[i];
+        r.right[i] = pos(points[i]) - normal * r.radii[i];
+    }
+    return r;
+}
+
 std::vector<QPointF> outline(const std::vector<StrokePoint> &points, float baseWidth,
                              bool usePressure)
 {
@@ -119,44 +141,53 @@ std::vector<QPointF> outline(const std::vector<StrokePoint> &points, float baseW
     if (points.empty())
         return out;
 
-    const auto radius = [&](const StrokePoint &p) {
-        return 0.5 * baseWidth * (usePressure ? pressureScale(p.pressure) : 1.0F);
-    };
-
-    if (points.size() == 1) {
-        const QPointF c = pos(points.front());
-        appendArc(out, c, radius(points.front()), 0.0);
-        appendArc(out, c, radius(points.front()), std::numbers::pi);
-        return out;
-    }
-
+    const StrokeRibbon r = ribbon(points, baseWidth, usePressure);
     const std::size_t n = points.size();
-    std::vector<QPointF> left(n), right(n);
-    std::vector<double> radii(n);
-    for (std::size_t i = 0; i < n; ++i) {
-        // Tangent from the neighbours; normal is the tangent turned 90°.
-        const QPointF a = pos(points[i == 0 ? 0 : i - 1]);
-        const QPointF b = pos(points[i + 1 == n ? n - 1 : i + 1]);
-        QPointF tangent = b - a;
-        const double len = std::hypot(tangent.x(), tangent.y());
-        tangent = len > 0.0 ? tangent / len : QPointF(1, 0);
-        const QPointF normal(-tangent.y(), tangent.x());
-        radii[i] = radius(points[i]);
-        left[i] = pos(points[i]) + normal * radii[i];
-        right[i] = pos(points[i]) - normal * radii[i];
+
+    if (n == 1) {
+        const QPointF c = pos(points.front());
+        appendArc(out, c, r.radii[0], 0.0);
+        appendArc(out, c, r.radii[0], std::numbers::pi);
+        return out;
     }
 
     const auto angleOf = [](QPointF v) { return std::atan2(v.y(), v.x()); };
 
     out.reserve(2 * n + 2 * kCapSegments);
-    out.insert(out.end(), left.begin(), left.end());
+    out.insert(out.end(), r.left.begin(), r.left.end());
     // End cap: from the left side, around the tip, to the right side.
-    appendArc(out, pos(points[n - 1]), radii[n - 1], angleOf(left[n - 1] - pos(points[n - 1])));
+    appendArc(out, pos(points[n - 1]), r.radii[n - 1], angleOf(r.left[n - 1] - pos(points[n - 1])));
     for (std::size_t i = n; i-- > 0;)
-        out.push_back(right[i]);
+        out.push_back(r.right[i]);
     // Start cap: from the right side, around the start, back to the left side.
-    appendArc(out, pos(points[0]), radii[0], angleOf(right[0] - pos(points[0])));
+    appendArc(out, pos(points[0]), r.radii[0], angleOf(r.right[0] - pos(points[0])));
     return out;
+}
+
+bool touchesCircle(const Stroke &stroke, QPointF center, double radius)
+{
+    if (stroke.points.empty())
+        return false;
+    // Cheap reject on the bounding box first.
+    if (!stroke.bbox.adjusted(-radius, -radius, radius, radius).contains(center))
+        return false;
+    const bool usePressure = stroke.tool == StrokeTool::Pen;
+    const auto halfWidth = [&](const StrokePoint &p) {
+        return 0.5 * stroke.width * (usePressure ? pressureScale(p.pressure) : 1.0F);
+    };
+    if (stroke.points.size() == 1)
+        return QLineF(center, pos(stroke.points[0])).length()
+            <= radius + halfWidth(stroke.points[0]);
+    for (std::size_t i = 0; i + 1 < stroke.points.size(); ++i) {
+        const StrokePoint &a = stroke.points[i];
+        const StrokePoint &b = stroke.points[i + 1];
+        double t = 0.0;
+        const double d = distanceToSegment(center, pos(a), pos(b), t);
+        const double w = halfWidth(a) + (halfWidth(b) - halfWidth(a)) * t;
+        if (d <= radius + w)
+            return true;
+    }
+    return false;
 }
 
 std::vector<StrokePoint> finishPoints(const std::vector<StrokePoint> &raw)

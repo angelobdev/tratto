@@ -131,10 +131,12 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
   - Events outside the canvas are passed through.
   - The **eraser tip** (`PointerType::Eraser`) activates the eraser while it is in use.
   - Many 2-in-1 pens have no eraser tip, only a barrel button: **holding the barrel button erases** (default; configurable in settings).
-- **Mouse:** constant pressure 0.5. Mouse events synthesized from touch are ignored.
+- **Mouse:** constant pressure 0.5; middle button drags to pan; wheel scrolls (Shift: sideways), Ctrl+wheel and touchpad pinch zoom. Mouse events synthesized from touch are ignored.
 - **Fingers:**
   - With **"Stylus only"** on (the default in tablet mode), a finger never draws.
-  - One finger scrolls, two fingers zoom, a two-finger tap undoes and a three-finger tap redoes.
+  - One finger scrolls, two fingers zoom, a two-finger tap undoes and a three-finger tap redoes (tap: < 250 ms, < 12 px of movement).
+  - With "Stylus only" off, one finger draws with the current tool.
+  - **Palm rejection:** touches are ignored while the stylus is down or was active in the last 500 ms; a stylus touching down cancels any finger gesture.
 
 **Stroke pipeline:**
 1. Raw samples → drop points that are too close (< 0.5 px on screen).
@@ -151,7 +153,7 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
   - constant width, color with alpha ≈ 0.45;
   - drawn on a layer **below** the ink;
   - "straight line" option: the stroke becomes a segment.
-- **Eraser, whole stroke:** hit-test the stroke segments against the eraser circle using the spatial grid → `RemoveObjects`.
+- **Eraser, whole stroke:** hit-test the stroke segments against the eraser circle (10 screen px) → `RemoveObjects`. One drag is one undo step (`UndoStack::beginGroup/endGroup`). Available since M1; the spatial grid comes when profiling asks for it. Until partial erasing lands (M3), "Partial" erases whole strokes with the chosen size.
 - **Eraser, partial:**
   - strokes are split at the edge of the circle → `ReplaceObjects`;
   - "highlighter only" option.
@@ -172,17 +174,22 @@ We use our own command stack rather than `QUndoStack`, because `QUndoStack` live
 
 **Layer order per page:** paper (color + pattern) → source (PDF raster or image) → inserted images → highlighter → ink → text → UI overlay (selection, handles, eraser cursor).
 
-**On screen:**
-
-- **Canvas item:** a custom `QQuickItem` that builds its own scene-graph nodes.
-- **Virtualized pages:** only visible pages are drawn.
+**On screen** (`CanvasItem`, a custom `QQuickItem`):
+- **One page at a time;** the pages panel switches pages. The view maps page pt to item px with `offset + pt × zoom × 680/595.28` (100% = an A4 page 680 px wide).
 - **Tiles:**
-  - each page is split into tiles (e.g. 512 px), painted with `QPainter` into `QImage`s **on worker threads** (`QThreadPool`);
-  - the tiles are uploaded as textures in `updatePaintNode()`.
+  - the page is split into 512 device-px tiles, painted with `render::paintPage` into `QImage`s on a `QThreadPool` (one core is left for the GUI and render threads);
+  - each job works on an immutable snapshot of the page (`shared_ptr<const Page>`), so the document can change while tiles render;
+  - every change bumps a generation; only tiles that intersect the changed area are re-rendered, and the old texture stays on screen until the new one arrives.
 - **Zoom:**
-  - quantized levels (0.5 / 0.75 / 1 / 1.5 / 2 / 3 / 4);
-  - during a pinch the existing textures are scaled; tiles are re-rasterized when the gesture ends.
-- **Live stroke:** a `QSGGeometryNode` (triangle strip of the outline) that never waits for tiles.
+  - continuous between 50% and 400%; the buttons step through 0.5 / 0.75 / 1 / 1.5 / 2 / 3 / 4;
+  - tiles are rasterized at the smallest of those levels ≥ the current zoom, so they are never upscaled;
+  - during a pinch or Ctrl+wheel the existing tiles are only scaled; 150 ms after the gesture ends the new level is rendered, with the old tiles kept underneath until it is complete.
+- **Live stroke:**
+  - triangles (`QSGGeometryNode`) rebuilt from the ribbon of the raw samples on every input event, never waiting for tiles;
+  - pen strokes get round joins and caps; highlighter previews don't, because overlapping translucent triangles would show as darker spots;
+  - on release the committed stroke stays drawn as geometry until the tiles under it have been re-rendered, so it never flickers;
+  - 4× MSAA (`QSurfaceFormat`) smooths the triangle edges.
+- **Scene graph nodes are placed in item coordinates**, not under a `QSGTransformNode`: the software renderer ignores those transforms. The canvas still needs a GPU renderer: with the software backend custom geometry is misplaced.
 - **Invalidation:** changing objects invalidates only the tiles that intersect their bbox.
 
 **Performance targets:**

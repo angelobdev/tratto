@@ -8,6 +8,7 @@ Rectangle {
     id: bar
 
     required property var note
+    required property NoteSession session
     property bool pagesPanelOpen: true
 
     signal back()
@@ -115,7 +116,8 @@ Rectangle {
             iconStrokeWidth: 1.8
             iconName: "undo"
             text: qsTr("Undo (Ctrl+Z)")
-            enabled: false // history arrives with the canvas in M1
+            enabled: bar.session.canUndo
+            onClicked: bar.session.undo()
         }
 
         IconButton {
@@ -125,7 +127,8 @@ Rectangle {
             iconStrokeWidth: 1.8
             iconName: "redo"
             text: qsTr("Redo (Ctrl+Shift+Z)")
-            enabled: false
+            enabled: bar.session.canRedo
+            onClicked: bar.session.redo()
         }
 
         Divider { length: 24; Layout.leftMargin: 0; Layout.rightMargin: 0 }

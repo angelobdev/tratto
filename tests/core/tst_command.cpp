@@ -123,6 +123,42 @@ private slots:
         QCOMPARE(doc.pages[0].objects.size(), 2u); // the two oldest can't be undone
     }
 
+    void groupUndoesAsOneStep()
+    {
+        Document doc = makeDocument();
+        const PageId page = doc.pages[0].id;
+        UndoStack stack;
+        std::vector<Object> strokes;
+        for (int i = 0; i < 3; ++i)
+            strokes.emplace_back(makeStroke(static_cast<float>(i * 20)));
+        stack.push(doc, std::make_unique<AddObjects>(page, strokes));
+        const auto ids = idsOn(doc.pages[0]);
+
+        stack.beginGroup();
+        QVERIFY(!stack.canUndo()); // no undo in the middle of a gesture
+        for (const ObjectId id : ids)
+            stack.push(doc, std::make_unique<RemoveObjects>(page, std::vector { id }));
+        QVERIFY(doc.pages[0].objects.empty()); // applied immediately
+        stack.endGroup();
+
+        QCOMPARE(stack.size(), 2u);
+        const auto change = stack.undo(doc);
+        QVERIFY(change.has_value());
+        QCOMPARE(change->page, page);
+        QCOMPARE(idsOn(doc.pages[0]), ids);
+        QVERIFY(change->bounds.contains(objectBounds(doc.pages[0].objects[2])));
+    }
+
+    void emptyGroupLeavesNoStep()
+    {
+        Document doc = makeDocument();
+        UndoStack stack;
+        stack.beginGroup();
+        stack.endGroup();
+        QCOMPARE(stack.size(), 0u);
+        QVERIFY(!stack.canUndo());
+    }
+
     void unknownPageIsIgnored()
     {
         Document doc = makeDocument();

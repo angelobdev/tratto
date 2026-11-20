@@ -11,6 +11,7 @@
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
+#include <QSurfaceFormat>
 #include <QTimer>
 
 Q_LOGGING_CATEGORY(lcApp, "tratto.app")
@@ -54,6 +55,12 @@ void scheduleScreenshot(QQmlApplicationEngine &engine, const QString &path)
 
 int main(int argc, char *argv[])
 {
+    // 4x multisampling: smooth edges for the live stroke, drawn as GPU triangles.
+    // Must be set before the application object exists.
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setSamples(4);
+    QSurfaceFormat::setDefaultFormat(format);
+
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("tratto"));
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Tratto"));

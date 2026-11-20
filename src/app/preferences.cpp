@@ -43,6 +43,11 @@ void Preferences::setInstance(Preferences *instance)
     s_instance = instance;
 }
 
+Preferences *Preferences::instance()
+{
+    return s_instance;
+}
+
 void Preferences::save()
 {
     QSettings &s = appSettings();

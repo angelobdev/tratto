@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Layouts
 
 // Editor: top bar, tool row, the page area and the pages panel.
-// The page shows only its paper for now; the canvas replaces it in M1.
+// The canvas shows one page at a time; the pages panel switches between them.
 Page {
     id: page
 
@@ -14,16 +13,16 @@ Page {
 
     signal back()
 
-    // 100% zoom shows an A4 page 680 px wide, as in the design.
-    readonly property real pixelsPerPointAt100: 680 / 595.28
-    readonly property var zoomLevels: [0.5, 0.75, 1, 1.5, 2, 3, 4]
-    property int zoomIndex: 2
-    readonly property real zoom: zoomLevels[zoomIndex]
-
     // Placeholder pages until notes are stored (M2): three pages of the note's paper.
     readonly property var pages: [note.paper, note.paper, note.paper]
-    property int currentPage: 0
     property bool pagesPanelOpen: true
+
+    NoteSession {
+        id: session
+
+        Component.onCompleted: createBlank(page.note.paper.pattern, page.note.paper.spacingMm,
+                                           page.note.paper.color, page.pages.length)
+    }
 
     EditorTools { id: tools }
 
@@ -36,11 +35,10 @@ Page {
     Shortcut { sequence: "T"; onActivated: tools.tool = EditorTools.Text }
     Shortcut { sequence: "S"; onActivated: tools.tool = EditorTools.Select }
     Shortcut { sequence: "I"; onActivated: tools.tool = EditorTools.Image }
-    Shortcut { sequences: [StandardKey.ZoomIn, "Ctrl+="]; onActivated: page.zoomIn() }
-    Shortcut { sequences: [StandardKey.ZoomOut]; onActivated: page.zoomOut() }
-
-    function zoomIn() { zoomIndex = Math.min(zoomIndex + 1, zoomLevels.length - 1) }
-    function zoomOut() { zoomIndex = Math.max(zoomIndex - 1, 0) }
+    Shortcut { sequences: [StandardKey.ZoomIn, "Ctrl+="]; onActivated: canvas.zoomIn() }
+    Shortcut { sequences: [StandardKey.ZoomOut]; onActivated: canvas.zoomOut() }
+    Shortcut { sequences: [StandardKey.Undo]; onActivated: session.undo() }
+    Shortcut { sequences: [StandardKey.Redo, "Ctrl+Shift+Z"]; onActivated: session.redo() }
 
     header: ColumnLayout {
         spacing: 0
@@ -48,6 +46,7 @@ Page {
         EditorTopBar {
             Layout.fillWidth: true
             note: page.note
+            session: session
             pagesPanelOpen: page.pagesPanelOpen
             onBack: page.back()
             onTogglePagesPanel: page.pagesPanelOpen = !page.pagesPanelOpen
@@ -68,67 +67,26 @@ Page {
             Layout.fillHeight: true
             clip: true
 
-            Flickable {
-                id: pageArea
+            CanvasItem {
+                id: canvas
 
                 anchors.fill: parent
-                contentWidth: Math.max(width, sheet.width + 48)
-                contentHeight: sheet.height + 32 + 96
-                boundsBehavior: Flickable.StopAtBounds
-
-                ScrollBar.vertical: ScrollBar {}
-                ScrollBar.horizontal: ScrollBar {}
-
-                // Soft page shadow (DESIGN.md: 0 10px 30px rgba(24,24,27,.08)).
-                MultiEffect {
-                    source: sheetShape
-                    anchors.fill: sheet
-                    shadowEnabled: true
-                    shadowColor: Qt.rgba(0.094, 0.094, 0.106, Theme.dark ? 0.5 : 0.08)
-                    shadowVerticalOffset: 10
-                    shadowBlur: 1.0
-                    blurMax: 30
-                    autoPaddingEnabled: true
-                }
-
-                Rectangle {
-                    id: sheetShape
-
-                    anchors.fill: sheet
-                    visible: false
-                    color: "white"
-                }
-
-                PaperThumbnail {
-                    id: sheet
-
-                    x: (pageArea.contentWidth - width) / 2
-                    y: 32
-                    width: 595.28 * page.pixelsPerPointAt100 * page.zoom
-                    height: 841.89 * page.pixelsPerPointAt100 * page.zoom
-                    pattern: page.pages[page.currentPage].pattern
-                    spacingMm: page.pages[page.currentPage].spacingMm
-                    paperColor: page.pages[page.currentPage].color
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: "transparent"
-                        border.color: Qt.rgba(0.094, 0.094, 0.106, 0.05)
-                    }
-                }
+                session: session
+                tools: tools
+                frameColor: Theme.border
             }
 
             ZoomControl {
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: Theme.gapL
-                zoom: page.zoom
-                canZoomIn: page.zoomIndex < page.zoomLevels.length - 1
-                canZoomOut: page.zoomIndex > 0
-                currentPage: page.currentPage
-                pageCount: page.pages.length
-                onZoomInRequested: page.zoomIn()
-                onZoomOutRequested: page.zoomOut()
+                zoom: canvas.zoom
+                canZoomIn: canvas.canZoomIn
+                canZoomOut: canvas.canZoomOut
+                currentPage: canvas.pageIndex
+                pageCount: session.pageCount
+                onZoomInRequested: canvas.zoomIn()
+                onZoomOutRequested: canvas.zoomOut()
             }
         }
 
@@ -136,8 +94,8 @@ Page {
             visible: page.pagesPanelOpen
             Layout.fillHeight: true
             pages: page.pages
-            currentPage: page.currentPage
-            onPageClicked: index => page.currentPage = index
+            currentPage: canvas.pageIndex
+            onPageClicked: index => canvas.pageIndex = index
         }
     }
 }

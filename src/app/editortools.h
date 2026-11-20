@@ -55,6 +55,13 @@ public:
     QList<QColor> highlighterColors() const;
     QList<int> textSizes() const;
 
+    // Read by the canvas.
+    int penColorIndex() const { return m_penColor; }
+    int highlighterColorIndex() const { return m_highlighterColor; }
+    bool straightHighlighter() const { return m_straightHighlighter; }
+    EraserMode eraserMode() const { return m_eraserMode; }
+    bool eraseHighlighterOnly() const { return m_eraseHighlighterOnly; }
+
     // Values for the canvas, in pt.
     float penWidthPt() const;
     float highlighterWidthPt() const;

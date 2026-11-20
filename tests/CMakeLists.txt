@@ -15,3 +15,16 @@ tratto_add_test(tst_command SOURCES core/tst_command.cpp LIBS tratto_core)
 tratto_add_test(tst_stroke_geometry SOURCES core/tst_stroke_geometry.cpp LIBS tratto_core)
 tratto_add_test(tst_paper_painter SOURCES render/tst_paper_painter.cpp LIBS tratto_render)
 tratto_add_test(tst_page_painter SOURCES render/tst_page_painter.cpp LIBS tratto_render)
+
+# The canvas and its collaborators, compiled straight into the test.
+set(TRATTO_APP_DIR ${PROJECT_SOURCE_DIR}/src/app)
+tratto_add_test(tst_canvas
+    SOURCES app/tst_canvas.cpp
+        ${TRATTO_APP_DIR}/canvasitem.h ${TRATTO_APP_DIR}/canvasitem.cpp
+        ${TRATTO_APP_DIR}/editortools.h ${TRATTO_APP_DIR}/editortools.cpp
+        ${TRATTO_APP_DIR}/notesession.h ${TRATTO_APP_DIR}/notesession.cpp
+        ${TRATTO_APP_DIR}/preferences.h ${TRATTO_APP_DIR}/preferences.cpp
+    LIBS tratto_render Qt6::Quick)
+target_include_directories(tst_canvas PRIVATE ${TRATTO_APP_DIR})
+# Keep the test from touching the user's settings.
+set_property(TEST tst_canvas APPEND PROPERTY ENVIRONMENT "XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/test-config")

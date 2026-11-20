@@ -27,10 +27,24 @@ namespace tratto::core {
 [[nodiscard]] std::vector<StrokePoint> simplify(const std::vector<StrokePoint> &points,
                                                 float tolerance, float pressureTolerance = 0.08F);
 
+// Left and right edges of a stroke (one point each per input point) and the radius
+// at each point. Used for the outline and for drawing the live stroke on the GPU.
+struct StrokeRibbon
+{
+    std::vector<QPointF> left;
+    std::vector<QPointF> right;
+    std::vector<double> radii;
+};
+[[nodiscard]] StrokeRibbon ribbon(const std::vector<StrokePoint> &points, float baseWidth,
+                                  bool usePressure);
+
 // Closed polygon around the stroke, with round caps. `usePressure` false gives a
 // constant width (highlighter, mouse). A single point gives a dot.
 [[nodiscard]] std::vector<QPointF> outline(const std::vector<StrokePoint> &points, float baseWidth,
                                            bool usePressure);
+
+// True when a circle (eraser) touches the stroke's outline.
+[[nodiscard]] bool touchesCircle(const Stroke &stroke, QPointF center, double radius);
 
 // Final processing on pen-up: smooth, then simplify with a low tolerance.
 [[nodiscard]] std::vector<StrokePoint> finishPoints(const std::vector<StrokePoint> &raw);

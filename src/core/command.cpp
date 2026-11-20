@@ -5,31 +5,44 @@
 
 namespace tratto::core {
 
+namespace {
+
+QRectF boundsOf(const std::vector<Object> &objects)
+{
+    QRectF bounds;
+    for (const Object &o : objects)
+        bounds |= objectBounds(o);
+    return bounds;
+}
+
+} // namespace
+
 AddObjects::AddObjects(PageId page, std::vector<Object> objects)
     : m_page(page)
     , m_objects(std::move(objects))
+    , m_bounds(boundsOf(m_objects))
 {
 }
 
-void AddObjects::apply(Document &doc)
+Change AddObjects::apply(Document &doc)
 {
-    Page *page = doc.page(m_page);
-    if (!page)
-        return;
-    page->objects.insert(page->objects.end(), m_objects.begin(), m_objects.end());
-    doc.dirtyPages.insert(m_page);
+    if (Page *page = doc.page(m_page)) {
+        page->objects.insert(page->objects.end(), m_objects.begin(), m_objects.end());
+        doc.dirtyPages.insert(m_page);
+    }
+    return { m_page, m_bounds };
 }
 
-void AddObjects::revert(Document &doc)
+Change AddObjects::revert(Document &doc)
 {
-    Page *page = doc.page(m_page);
-    if (!page)
-        return;
-    std::erase_if(page->objects, [this](const Object &o) {
-        return std::ranges::any_of(
-            m_objects, [&](const Object &added) { return objectId(added) == objectId(o); });
-    });
-    doc.dirtyPages.insert(m_page);
+    if (Page *page = doc.page(m_page)) {
+        std::erase_if(page->objects, [this](const Object &o) {
+            return std::ranges::any_of(
+                m_objects, [&](const Object &added) { return objectId(added) == objectId(o); });
+        });
+        doc.dirtyPages.insert(m_page);
+    }
+    return { m_page, m_bounds };
 }
 
 RemoveObjects::RemoveObjects(PageId page, std::vector<ObjectId> ids)
@@ -38,33 +51,58 @@ RemoveObjects::RemoveObjects(PageId page, std::vector<ObjectId> ids)
 {
 }
 
-void RemoveObjects::apply(Document &doc)
+Change RemoveObjects::apply(Document &doc)
 {
-    Page *page = doc.page(m_page);
-    if (!page)
-        return;
     m_removed.clear();
-    for (std::size_t i = page->objects.size(); i-- > 0;) {
-        if (std::ranges::find(m_ids, objectId(page->objects[i])) != m_ids.end()) {
-            m_removed.emplace_back(i, std::move(page->objects[i]));
-            page->objects.erase(page->objects.begin() + static_cast<std::ptrdiff_t>(i));
+    m_bounds = { };
+    if (Page *page = doc.page(m_page)) {
+        for (std::size_t i = page->objects.size(); i-- > 0;) {
+            if (std::ranges::find(m_ids, objectId(page->objects[i])) != m_ids.end()) {
+                m_bounds |= objectBounds(page->objects[i]);
+                m_removed.emplace_back(i, std::move(page->objects[i]));
+                page->objects.erase(page->objects.begin() + static_cast<std::ptrdiff_t>(i));
+            }
         }
+        doc.dirtyPages.insert(m_page);
     }
-    doc.dirtyPages.insert(m_page);
+    return { m_page, m_bounds };
 }
 
-void RemoveObjects::revert(Document &doc)
+Change RemoveObjects::revert(Document &doc)
 {
-    Page *page = doc.page(m_page);
-    if (!page)
-        return;
-    // m_removed holds descending indices; reinsert in ascending order.
-    for (auto it = m_removed.rbegin(); it != m_removed.rend(); ++it) {
-        const auto index = static_cast<std::ptrdiff_t>(std::min(it->first, page->objects.size()));
-        page->objects.insert(page->objects.begin() + index, it->second);
+    if (Page *page = doc.page(m_page)) {
+        // m_removed holds descending indices; reinsert in ascending order.
+        for (auto it = m_removed.rbegin(); it != m_removed.rend(); ++it) {
+            const auto index
+                = static_cast<std::ptrdiff_t>(std::min(it->first, page->objects.size()));
+            page->objects.insert(page->objects.begin() + index, it->second);
+        }
+        doc.dirtyPages.insert(m_page);
     }
     m_removed.clear();
-    doc.dirtyPages.insert(m_page);
+    return { m_page, m_bounds };
+}
+
+Change CommandGroup::apply(Document &doc)
+{
+    Change total;
+    for (const auto &command : m_commands) {
+        const Change c = command->apply(doc);
+        total.page = c.page;
+        total.bounds |= c.bounds;
+    }
+    return total;
+}
+
+Change CommandGroup::revert(Document &doc)
+{
+    Change total;
+    for (auto it = m_commands.rbegin(); it != m_commands.rend(); ++it) {
+        const Change c = (*it)->revert(doc);
+        total.page = c.page;
+        total.bounds |= c.bounds;
+    }
+    return total;
 }
 
 UndoStack::UndoStack(std::size_t limit)
@@ -72,9 +110,18 @@ UndoStack::UndoStack(std::size_t limit)
 {
 }
 
-void UndoStack::push(Document &doc, std::unique_ptr<Command> command)
+Change UndoStack::push(Document &doc, std::unique_ptr<Command> command)
 {
-    command->apply(doc);
+    const Change change = command->apply(doc);
+    if (m_group)
+        m_group->add(std::move(command));
+    else
+        record(std::move(command));
+    return change;
+}
+
+void UndoStack::record(std::unique_ptr<Command> command)
+{
     m_commands.erase(m_commands.begin() + static_cast<std::ptrdiff_t>(m_index), m_commands.end());
     m_commands.push_back(std::move(command));
     if (m_commands.size() > m_limit)
@@ -82,26 +129,40 @@ void UndoStack::push(Document &doc, std::unique_ptr<Command> command)
     m_index = m_commands.size();
 }
 
-bool UndoStack::undo(Document &doc)
+void UndoStack::beginGroup()
 {
-    if (!canUndo())
-        return false;
-    m_commands[--m_index]->revert(doc);
-    return true;
+    if (!m_group)
+        m_group = std::make_unique<CommandGroup>();
 }
 
-bool UndoStack::redo(Document &doc)
+void UndoStack::endGroup()
+{
+    if (!m_group)
+        return;
+    auto group = std::move(m_group);
+    if (!group->empty())
+        record(std::move(group)); // already applied
+}
+
+std::optional<Change> UndoStack::undo(Document &doc)
+{
+    if (!canUndo())
+        return std::nullopt;
+    return m_commands[--m_index]->revert(doc);
+}
+
+std::optional<Change> UndoStack::redo(Document &doc)
 {
     if (!canRedo())
-        return false;
-    m_commands[m_index++]->apply(doc);
-    return true;
+        return std::nullopt;
+    return m_commands[m_index++]->apply(doc);
 }
 
 void UndoStack::clear()
 {
     m_commands.clear();
     m_index = 0;
+    m_group.reset();
 }
 
 } // namespace tratto::core

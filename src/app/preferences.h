@@ -34,6 +34,7 @@ public:
 
     static Preferences *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
     static void setInstance(Preferences *instance);
+    static Preferences *instance(); // for C++ readers such as the canvas
 
     TabletMode tabletMode() const { return m_tabletMode; }
     void setTabletMode(TabletMode mode);

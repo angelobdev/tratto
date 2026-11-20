@@ -56,6 +56,8 @@ qt_add_qml_module(tratto
         appsettings.h
         paperthumbnail.h paperthumbnail.cpp
         editortools.h editortools.cpp
+        notesession.h notesession.cpp
+        canvasitem.h canvasitem.cpp
 )
 
 # Inter (SIL Open Font License, see fonts/OFL.txt), loaded at startup.
